@@ -11,12 +11,7 @@ import { motion } from "framer-motion";
 export default function VinylPage() {
   const [showButton, setShowButton] = useState(false);
   const [showMessage, setShowMessage] = useState(true);
-  const [isVinylClicked, setIsVinylClicked] = useState(false);
   const router = useRouter();
-
-  const handleVinylClick = () => {
-    setIsVinylClicked(!isVinylClicked);
-  };
 
   return (
     <div
@@ -38,8 +33,6 @@ export default function VinylPage() {
         <p className="text-gray-300 text-lg">
           Software Developer & Video Editor
         </p>
-
-        {/* Buttons */}
         <div className="flex space-x-4 mt-4">
           <a
             href="/resume.pdf"
@@ -75,14 +68,11 @@ export default function VinylPage() {
         <VinylPlayer
           setShowButton={setShowButton}
           setShowMessage={setShowMessage}
-          setIsVinylClicked={setIsVinylClicked}
-          isVinylClicked={isVinylClicked}
-          handleVinylClick={handleVinylClick}
         />
       </Canvas>
 
       {/* Show message before clicking */}
-      {showMessage && !isVinylClicked && (
+      {showMessage && (
         <motion.div
           className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white"
           initial={{ opacity: 0 }}
@@ -96,7 +86,7 @@ export default function VinylPage() {
       )}
 
       {/* Explore Button */}
-      {showButton && isVinylClicked && (
+      {showButton && (
         <motion.div
           className="absolute bottom-16 left-1/2 -translate-x-1/2"
           initial={{ opacity: 0 }}
@@ -118,9 +108,9 @@ export default function VinylPage() {
 function VinylPlayer({
   setShowButton,
   setShowMessage,
-  setIsVinylClicked,
-  isVinylClicked,
-  handleVinylClick,
+}: {
+  setShowButton: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowMessage: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { scene, animations } = useGLTF("/vinyl_player.glb");
   const { actions } = useAnimations(animations, scene);
@@ -133,9 +123,9 @@ function VinylPlayer({
   });
 
   const handleClick = () => {
-    if (actions) {
+    if (actions && Object.values(actions).length > 0) {
       Object.values(actions).forEach((action) =>
-        isPlaying ? action.stop() : action.play()
+        isPlaying ? action?.stop() : action?.play()
       );
       setIsPlaying(!isPlaying);
       targetCameraPosition.current.set(
@@ -143,23 +133,19 @@ function VinylPlayer({
         isPlaying ? 2 : 3.5,
         isPlaying ? 4 : 2
       );
-
-      handleVinylClick();
-
       setTimeout(() => {
         setShowButton(!isPlaying);
         setShowMessage(false);
       }, 500);
     } else {
-      setIsVinylClicked(false);
       setShowButton(false);
       setShowMessage(true);
     }
   };
 
   useEffect(() => {
-    if (actions) {
-      Object.values(actions).forEach((action) => action.stop());
+    if (actions && Object.values(actions).length > 0) {
+      Object.values(actions).forEach((action) => action?.stop());
     }
   }, [actions]);
 

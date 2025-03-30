@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const NAV_OPTIONS = ["About Me", "Home", "Secret", "Projects"];
 const SECTION_PLACEHOLDERS = {
@@ -22,6 +23,8 @@ export default function VinylNavigation() {
   const router = useRouter();
 
   useEffect(() => {
+    let frameId: number;
+
     const updateRotation = () => {
       smoothScrollRef.current +=
         (window.scrollY - smoothScrollRef.current) * 0.1;
@@ -61,11 +64,12 @@ export default function VinylNavigation() {
         }
       });
 
-      requestAnimationFrame(updateRotation);
+      frameId = requestAnimationFrame(updateRotation);
     };
 
-    requestAnimationFrame(updateRotation);
-    return () => cancelAnimationFrame(updateRotation);
+    frameId = requestAnimationFrame(updateRotation);
+
+    return () => cancelAnimationFrame(frameId);
   }, []);
 
   return (
@@ -85,7 +89,9 @@ export default function VinylNavigation() {
         {NAV_OPTIONS.map((option, index) => (
           <button
             key={option}
-            ref={(el) => (navRefs.current[index] = el)}
+            ref={(el) => {
+              navRefs.current[index] = el;
+            }}
             onClick={() =>
               router.push(
                 option === "Home"
@@ -110,14 +116,15 @@ export default function VinylNavigation() {
           const isActive = activeIndex === index;
           let offset = (index + 1) * 60;
 
+          // Adjust the 'Home' offset to make it appear higher
           if (option === "Home") {
-            offset = -30;
+            offset = -60;
           } else if (option === "Projects" && activeIndex >= 0) {
-            offset = 0;
+            offset = -40;
           }
 
           if (option === "Secret" && activeIndex >= 1) {
-            offset = 125;
+            offset = 80;
           }
 
           return (
@@ -132,34 +139,47 @@ export default function VinylNavigation() {
             >
               <h2 className="text-3xl font-bold text-white">{option}</h2>
               <p className="text-lg text-gray-300">
-                {SECTION_PLACEHOLDERS[option]}
+                {
+                  SECTION_PLACEHOLDERS[
+                    option as keyof typeof SECTION_PLACEHOLDERS
+                  ]
+                }
               </p>
+
               {option === "Home" && (
-                <img
+                <Image
                   src="/bart-simpson.jpg"
                   alt="Bart Simpson"
-                  className="mt-4 w-[120px] h-[120px] max-w-md  rounded-lg shadow-lg mx-auto"
+                  width={120}
+                  height={120}
+                  className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
               {option === "About Me" && (
-                <img
-                  src="/homer.jpg"
-                  alt="Homer Simpson"
-                  className="mt-4 w-full max-w-md rounded-lg shadow-lg"
+                <Image
+                  src="/bart-simpson.jpg"
+                  alt="Bart Simpson"
+                  width={120}
+                  height={120}
+                  className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
               {option === "Projects" && (
-                <img
+                <Image
                   src="/bart-simpson.jpg"
                   alt="Bart Simpson"
-                  className="mt-4 w-[120px] h-[120px] max-w-md  rounded-lg shadow-lg mx-auto"
+                  width={120}
+                  height={120}
+                  className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
               {option === "Secret" && (
-                <img
+                <Image
                   src="/bart-simpson.jpg"
                   alt="Bart Simpson"
-                  className="mt-4 w-[120px] h-[120px] max-w-md  rounded-lg shadow-lg mx-auto"
+                  width={120}
+                  height={120}
+                  className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
             </div>
