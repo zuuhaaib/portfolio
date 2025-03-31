@@ -31,11 +31,11 @@ export default function VinylPage() {
         <h1 className="text-lg font-semibold">Hi, I am</h1>
         <h2 className="text-6xl font-bold">Zuhaib Khan</h2>
         <p className="text-gray-300 text-lg">
-          Software Developer & Video Editor
+          Computer Science Student | Full Stack Developer
         </p>
         <div className="flex space-x-4 mt-4">
           <a
-            href="/resume.pdf"
+            href="https://drive.google.com/file/d/1B6igxFHeufDJhX3aoolAaruAaG8cjqcJ/view?usp=sharing"
             target="_blank"
             className="flex items-center px-6 py-2 bg-white text-black rounded-lg font-semibold shadow-lg hover:scale-105 transition"
           >

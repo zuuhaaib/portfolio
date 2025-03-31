@@ -4,15 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-const NAV_OPTIONS = ["About Me", "Home", "Secret", "Projects"];
+const NAV_OPTIONS = ["About Me", "Home", "brian_rot", "Projects"];
 const SECTION_PLACEHOLDERS = {
   "About Me":
     "Find out more about me! My background, my journey (emotional) and why I am the way I am (not really). Here's a fun fact - I recently found out that cows have accents depending on where they’re born, and they also have best friends and get depressed when separated (I believe everything I see on the internet).",
   Home: "Well, I feel like it's pretty self-explanatory. But clicking on this will take you back to the homepage (no way!!). I'm just yapping so that there’s no dead space here. Maybe I should add a funny image at the bottom.",
   Projects:
     "Projects I've worked on or am currently working on. Most of the projects have been the result of not sleeping on time, procrastinating, or maybe someone at a party said 'I have an idea for an app' (pls no more of this).",
-  Secret:
-    "A hidden secret section with exclusive content. Here, I share some personal insights, behind-the-scenes moments, or maybe even something special just for the curious ones.",
+  brian_rot:
+    "this is where i drop my highly curated, absolutely flawless (objective) music and movie recommendations. expect hidden gems, questionable obsessions, and maybe a few guilty pleasures i’ll pretend are ironic.",
 };
 
 export default function VinylNavigation() {
@@ -96,6 +96,10 @@ export default function VinylNavigation() {
               router.push(
                 option === "Home"
                   ? "/"
+                  : option === "brian_rot"
+                  ? "/brian_rot"
+                  : ["About Me", "Projects"].includes(option)
+                  ? "/coming-soon"
                   : `/${option.toLowerCase().replace(/ /g, "-")}`
               )
             }
@@ -116,15 +120,14 @@ export default function VinylNavigation() {
           const isActive = activeIndex === index;
           let offset = (index + 1) * 60;
 
-          // Adjust the 'Home' offset to make it appear higher
           if (option === "Home") {
-            offset = -60;
+            offset = -70;
           } else if (option === "Projects" && activeIndex >= 0) {
-            offset = -40;
+            offset = -70;
           }
 
-          if (option === "Secret" && activeIndex >= 1) {
-            offset = 80;
+          if (option === "brian_rot" && activeIndex >= 1) {
+            offset = 60;
           }
 
           return (
@@ -150,35 +153,35 @@ export default function VinylNavigation() {
                 <Image
                   src="/bart-simpson.jpg"
                   alt="Bart Simpson"
-                  width={120}
-                  height={120}
+                  width={200}
+                  height={200}
                   className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
               {option === "About Me" && (
                 <Image
-                  src="/bart-simpson.jpg"
-                  alt="Bart Simpson"
-                  width={120}
-                  height={120}
+                  src="/jake.jpg"
+                  alt="bakin"
+                  width={300}
+                  height={300}
                   className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
               {option === "Projects" && (
                 <Image
-                  src="/bart-simpson.jpg"
-                  alt="Bart Simpson"
-                  width={120}
-                  height={120}
+                  src="/sadge.jpg"
+                  alt="sadge"
+                  width={280}
+                  height={280}
                   className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
-              {option === "Secret" && (
+              {option === "brian_rot" && (
                 <Image
-                  src="/bart-simpson.jpg"
-                  alt="Bart Simpson"
-                  width={120}
-                  height={120}
+                  src="/brian.jpg"
+                  alt="brian"
+                  width={300}
+                  height={300}
                   className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
