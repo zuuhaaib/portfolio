@@ -74,10 +74,12 @@ const AboutPage: React.FC = () => {
             about the ethical and societal implications of tech.
           </p>
           <p className="mt-2">
-            In spring 2024, I took a splendid course on the human impact of
-            technology throughout history. One memorable takeaway was how
-            today&#39;s challenges - AI art, social media, and digital
-            ethics—have echoes in past technological revolutions.
+            In winter 2024, I took an ethics course that really resonated with
+            me. I&#39;ve always been intrigued by ethics, especially metaethics,
+            and how AI and technology are reshaping those concepts. The course
+            pushed me to dive deeper into questions about morality in the
+            digital age, questioning how emerging technologies like AI challenge
+            our understanding of right and wrong.
           </p>
         </motion.section>
 
