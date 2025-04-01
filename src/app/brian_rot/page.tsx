@@ -66,7 +66,7 @@ export default function BrianRot() {
   return (
     <div className="min-h-screen flex flex-col items-center bg-[#131b33] text-white p-10">
       <motion.h1
-        className="text-5xl font-bold mb-6"
+        className="text-5xl font-bold mb-6 text-yellow-400 drop-shadow-lg"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -84,14 +84,14 @@ export default function BrianRot() {
       </p>
 
       {/* Top 4 Movies */}
-      <h2 className="text-3xl font-bold mt-10">top 4 movies</h2>
-      <div className="flex gap-6 mt-6">
+      <h2 className="text-3xl font-bold mt-10 text-yellow-400">top 4 movies</h2>
+      <div className="flex flex-wrap gap-6 mt-6 justify-center">
         {topMovies.map((movie) => (
           <motion.a
             key={movie.title}
             href={movie.link}
             target="_blank"
-            className="text-center cursor-pointer transform transition-transform hover:scale-110"
+            className="text-center cursor-pointer transform transition-transform hover:scale-105"
             whileHover={{ scale: 1.1 }}
           >
             <Image
@@ -99,7 +99,7 @@ export default function BrianRot() {
               alt={movie.title}
               width={160}
               height={240}
-              className="rounded-lg shadow-lg"
+              className="rounded-lg shadow-lg hover:shadow-2xl transition-all"
             />
             <p className="mt-2 font-semibold text-xl">{movie.title}</p>
             <p className="text-gray-400 text-sm">{movie.director}</p>
@@ -108,14 +108,14 @@ export default function BrianRot() {
       </div>
 
       {/* Top Albums */}
-      <h2 className="text-3xl font-bold mt-12">top 4 albums</h2>
-      <div className="flex gap-6 mt-6">
+      <h2 className="text-3xl font-bold mt-12 text-yellow-400">top 4 albums</h2>
+      <div className="flex flex-wrap gap-6 mt-6 justify-center">
         {topAlbums.map((album) => (
           <motion.a
             key={album.title}
             href={album.link}
             target="_blank"
-            className="text-center cursor-pointer transform transition-transform hover:scale-110"
+            className="text-center cursor-pointer transform transition-transform hover:scale-105"
             whileHover={{ scale: 1.1 }}
           >
             <Image
@@ -123,7 +123,7 @@ export default function BrianRot() {
               alt={album.title}
               width={160}
               height={160}
-              className="rounded-lg shadow-lg"
+              className="rounded-lg shadow-lg hover:shadow-2xl transition-all"
             />
             <p className="mt-2 font-semibold text-xl">{album.title}</p>
             <p className="text-gray-400 text-sm">{album.artist}</p>
@@ -134,7 +134,7 @@ export default function BrianRot() {
       {/* Secret Game */}
       <motion.button
         onClick={() => setShowSecret(true)}
-        className="mt-12 px-6 py-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-all"
+        className="mt-12 px-6 py-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-all shadow-lg hover:shadow-2xl"
         whileHover={{ scale: 1.1 }}
       >
         [do not click]
@@ -151,7 +151,7 @@ export default function BrianRot() {
 
       <motion.button
         onClick={() => router.push("/")}
-        className="mt-8 px-6 py-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-all"
+        className="mt-8 px-6 py-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-all shadow-lg hover:shadow-2xl"
         whileHover={{ scale: 1.1 }}
       >
         take me back

@@ -98,7 +98,9 @@ export default function VinylNavigation() {
                   ? "/"
                   : option === "brian_rot"
                   ? "/brian_rot"
-                  : ["About Me", "Projects"].includes(option)
+                  : option == "About Me"
+                  ? "/about-me"
+                  : ["Projects"].includes(option)
                   ? "/coming-soon"
                   : `/${option.toLowerCase().replace(/ /g, "-")}`
               )
