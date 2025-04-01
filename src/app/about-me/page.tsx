@@ -124,7 +124,7 @@ const AboutPage: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 1.1 }}
       >
-        If you made it this far, congrats—you now know more about me than most
+        If you made it this far, congrats! you now know more about me than most
         of my extended family. If you want to{" "}
         <strong>chat, collaborate, or hire me (please)</strong>, shoot me an
         email.{" "}
