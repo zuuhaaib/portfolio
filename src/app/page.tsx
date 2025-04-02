@@ -5,13 +5,29 @@ import { useGLTF, useAnimations } from "@react-three/drei";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import * as THREE from "three";
-import { FaGithub, FaLinkedin, FaFileAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useAudio } from "@/context/AudioContext";
+import {
+  FaGithub,
+  FaLinkedin,
+  FaFileAlt,
+  FaVolumeUp,
+  FaVolumeMute,
+} from "react-icons/fa";
 
 export default function VinylPage() {
   const [showButton, setShowButton] = useState(false);
   const [showMessage, setShowMessage] = useState(true);
+  const { isMuted, toggleMute, playAudio, stopAudio } = useAudio();
   const router = useRouter();
+
+  const handleClick = () => {
+    if (isMuted) {
+      stopAudio();
+    } else {
+      playAudio();
+    }
+  };
 
   return (
     <div
@@ -21,6 +37,14 @@ export default function VinylPage() {
           "radial-gradient(circle at 50% 30%, #5c6ea6, #404e78, #2b3656, #1a243a)",
       }}
     >
+      {/* Mute Button */}
+      <button
+        className="absolute top-4 right-4 p-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 transition"
+        onClick={toggleMute}
+      >
+        {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
+      </button>
+
       {/* Left Section: Text & Buttons */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -68,6 +92,7 @@ export default function VinylPage() {
         <VinylPlayer
           setShowButton={setShowButton}
           setShowMessage={setShowMessage}
+          handleClick={handleClick}
         />
       </Canvas>
 
@@ -85,7 +110,7 @@ export default function VinylPage() {
         </motion.div>
       )}
 
-      {/* Explore Button */}
+      {/* Explore Button (Appears after clicking vinyl) */}
       {showButton && (
         <motion.div
           className="absolute bottom-16 left-1/2 -translate-x-1/2"
@@ -108,9 +133,11 @@ export default function VinylPage() {
 function VinylPlayer({
   setShowButton,
   setShowMessage,
+  handleClick,
 }: {
   setShowButton: React.Dispatch<React.SetStateAction<boolean>>;
   setShowMessage: React.Dispatch<React.SetStateAction<boolean>>;
+  handleClick: () => void;
 }) {
   const { scene, animations } = useGLTF("/vinyl_player.glb");
   const { actions } = useAnimations(animations, scene);
@@ -122,7 +149,8 @@ function VinylPlayer({
     camera.lookAt(0, 0, 0);
   });
 
-  const handleClick = () => {
+  const handleVinylClick = () => {
+    handleClick();
     if (actions && Object.values(actions).length > 0) {
       Object.values(actions).forEach((action) =>
         isPlaying ? action?.stop() : action?.play()
@@ -149,5 +177,5 @@ function VinylPlayer({
     }
   }, [actions]);
 
-  return <primitive object={scene} scale={0.02} onClick={handleClick} />;
+  return <primitive object={scene} scale={0.02} onClick={handleVinylClick} />;
 }

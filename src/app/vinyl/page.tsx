@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
+import { useAudio } from "@/context/AudioContext";
 
 const NAV_OPTIONS = ["About Me", "Home", "brian_rot", "Projects"];
 const SECTION_PLACEHOLDERS = {
@@ -20,6 +22,7 @@ export default function VinylNavigation() {
   const navRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const smoothScrollRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
+  const { isMuted, toggleMute } = useAudio();
   const router = useRouter();
 
   useEffect(() => {
@@ -80,6 +83,14 @@ export default function VinylNavigation() {
           "radial-gradient(circle at 50% 25%, #2b3a55, #1e2a44, #131b33, #0b132b)",
       }}
     >
+      {/* Mute Button */}
+      <button
+        className="absolute top-4 right-4 p-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 transition"
+        onClick={toggleMute}
+      >
+        {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
+      </button>
+
       <div className="fixed top-1/2 left-[-20%] translate-y-[-50%] w-[70vh] h-[70vh] flex items-center justify-center">
         <div
           ref={vinylRef}
