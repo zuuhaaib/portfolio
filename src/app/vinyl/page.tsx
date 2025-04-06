@@ -24,7 +24,6 @@ export default function VinylNavigation() {
   const [activeIndex, setActiveIndex] = useState(0);
   const { isMuted, toggleMute } = useAudio();
   const router = useRouter();
-
   const [viewportHeight, setViewportHeight] = useState(0);
 
   useEffect(() => {
@@ -86,6 +85,21 @@ export default function VinylNavigation() {
     return () => cancelAnimationFrame(frameId);
   }, [viewportHeight]);
 
+  const getRoutePath = (option: string): string => {
+    switch (option) {
+      case "Home":
+        return "/";
+      case "brian_rot":
+        return "/brian_rot";
+      case "About Me":
+        return "/about-me";
+      case "Projects":
+        return "/coming-soon";
+      default:
+        return `/${option.toLowerCase().replace(/ /g, "-")}`;
+    }
+  };
+
   return (
     <div
       className="min-h-[300vh] w-full flex flex-col items-center justify-center relative overflow-hidden"
@@ -116,19 +130,7 @@ export default function VinylNavigation() {
             ref={(el) => {
               navRefs.current[index] = el;
             }}
-            onClick={() =>
-              router.push(
-                option === "Home"
-                  ? "/"
-                  : option === "brian_rot"
-                  ? "/brian_rot"
-                  : option == "About Me"
-                  ? "/about-me"
-                  : ["Projects"].includes(option)
-                  ? "/coming-soon"
-                  : `/${option.toLowerCase().replace(/ /g, "-")}`
-              )
-            }
+            onClick={() => router.push(getRoutePath(option))}
             className="absolute text-lg font-semibold shadow-lg transition-all ease-out duration-200"
             style={{
               left: "50%",
