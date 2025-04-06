@@ -6,7 +6,12 @@ import Image from "next/image";
 import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import { useAudio } from "@/context/AudioContext";
 
-const NAV_OPTIONS = ["About Me", "Home", "brian_rot", "Projects"];
+// Display Order
+const NAV_OPTIONS = ["Home", "About Me", "Projects", "brian_rot"];
+
+// Vinyl Layout Order (for button positions)
+const VINYL_LAYOUT_ORDER = ["About Me", "Home", "brian_rot", "Projects"];
+
 const SECTION_PLACEHOLDERS = {
   "About Me":
     "Find out more about me! My background, my journey (emotional) and why I am the way I am (not really). Here's a fun fact - I recently found out that cows have accents depending on where they're born, and they also have best friends and get depressed when separated (I believe everything I see on the internet).",
@@ -61,7 +66,7 @@ export default function VinylNavigation() {
       navRefs.current.forEach((navItem, index) => {
         if (navItem) {
           const baseAngle =
-            (index / NAV_OPTIONS.length) * Math.PI * 2 - Math.PI / 2;
+            (index / VINYL_LAYOUT_ORDER.length) * Math.PI * 2 - Math.PI / 2;
           const dynamicAngle = baseAngle + (slowedRotation * Math.PI) / 180;
 
           const radius =
@@ -84,7 +89,7 @@ export default function VinylNavigation() {
         }
       });
 
-      setActiveIndex(closestIndex);
+      setActiveIndex(NAV_OPTIONS.indexOf(VINYL_LAYOUT_ORDER[closestIndex]));
 
       navRefs.current.forEach((navItem, index) => {
         if (navItem) {
@@ -143,7 +148,7 @@ export default function VinylNavigation() {
           style={{ backgroundImage: "url('/vinyl_texture.png')" }}
         ></div>
 
-        {NAV_OPTIONS.map((option, index) => (
+        {VINYL_LAYOUT_ORDER.map((option, index) => (
           <button
             key={option}
             ref={(el) => {
@@ -166,13 +171,6 @@ export default function VinylNavigation() {
       <div className="absolute top-0 right-[5vw] w-[80vw] md:w-[60vw] lg:w-[50vw] h-[300vh] flex flex-col justify-start items-start pt-[20vh] md:pt-[10vh] px-4 md:px-0">
         {NAV_OPTIONS.map((option, index) => {
           const isActive = activeIndex === index;
-          let offset = (index + 1) * 60;
-
-          if (option === "Home") offset = windowWidth < 768 ? -50 : -70;
-          else if (option === "Projects" && activeIndex >= 0)
-            offset = windowWidth < 768 ? -50 : -70;
-          else if (option === "brian_rot" && activeIndex >= 1)
-            offset = windowWidth < 768 ? 40 : 60;
 
           return (
             <div
@@ -180,9 +178,6 @@ export default function VinylNavigation() {
               className={`w-full p-4 md:p-6 mb-6 transition-opacity duration-300 ease-in-out transform transition-transform ${
                 isActive ? "opacity-100 scale-105" : "opacity-40 scale-100"
               }`}
-              style={{
-                transform: `translateY(${offset}vh)`,
-              }}
             >
               <h2 className="text-2xl md:text-3xl font-bold text-white">
                 {option}
