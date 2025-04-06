@@ -55,13 +55,15 @@ export default function VinylNavigation() {
       const textMultiplier = 0.4;
       const slowedRotation = totalRotation * textMultiplier;
 
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+
       navRefs.current.forEach((navItem, index) => {
         if (navItem) {
           const baseAngle =
             (index / NAV_OPTIONS.length) * Math.PI * 2 - Math.PI / 2;
           const dynamicAngle = baseAngle + (slowedRotation * Math.PI) / 180;
 
-          // Adjust radius based on screen size
           const radius =
             windowWidth < 768
               ? Math.min(windowWidth, 600) * 0.35
@@ -70,18 +72,28 @@ export default function VinylNavigation() {
           const x = radius * Math.cos(dynamicAngle);
           const y = radius * Math.sin(dynamicAngle);
 
+          const distanceToRight = Math.abs(x - radius);
+          if (distanceToRight < closestDistance) {
+            closestDistance = distanceToRight;
+            closestIndex = index;
+          }
+
           navItem.style.transition =
             "transform 0.2s ease-out, color 0.2s ease-out, font-weight 0.2s ease-out";
-          const isActive = Math.abs(x - radius) < 20;
+          navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+        }
+      });
 
+      setActiveIndex(closestIndex);
+
+      navRefs.current.forEach((navItem, index) => {
+        if (navItem) {
+          const isActive = index === closestIndex;
           const scale =
             windowWidth < 768 ? (isActive ? 1.5 : 1.2) : isActive ? 1.8 : 1.5;
-
-          navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`;
+          navItem.style.transform += ` scale(${scale})`;
           navItem.style.color = isActive ? "#FFD700" : "#6B7A99";
           navItem.style.fontWeight = isActive ? "bold" : "normal";
-
-          if (isActive) setActiveIndex(index);
         }
       });
 
