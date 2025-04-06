@@ -25,6 +25,17 @@ export default function VinylNavigation() {
   const { isMuted, toggleMute } = useAudio();
   const router = useRouter();
 
+  const [viewportHeight, setViewportHeight] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     let frameId: number;
 
@@ -32,9 +43,9 @@ export default function VinylNavigation() {
       smoothScrollRef.current +=
         (window.scrollY - smoothScrollRef.current) * 0.1;
 
-      const maxScroll = document.body.scrollHeight - window.innerHeight;
-      const scrollFraction = smoothScrollRef.current / maxScroll;
-      const totalRotation = Math.min(scrollFraction * 720, 720);
+      const maxScroll = document.body.scrollHeight - viewportHeight;
+      const scrollFraction = Math.min(smoothScrollRef.current / maxScroll, 1);
+      const totalRotation = scrollFraction * 720;
 
       if (vinylRef.current) {
         vinylRef.current.style.transform = `rotate(${totalRotation}deg)`;
@@ -48,14 +59,15 @@ export default function VinylNavigation() {
           const baseAngle =
             (index / NAV_OPTIONS.length) * Math.PI * 2 - Math.PI / 2;
           const dynamicAngle = baseAngle + (slowedRotation * Math.PI) / 180;
-          const radius = 280;
 
-          const x = radius * Math.cos(dynamicAngle);
-          const y = radius * Math.sin(dynamicAngle);
+          const responsiveRadius = Math.min(window.innerWidth, 600) * 0.45;
+
+          const x = responsiveRadius * Math.cos(dynamicAngle);
+          const y = responsiveRadius * Math.sin(dynamicAngle);
 
           navItem.style.transition =
             "transform 0.2s ease-out, color 0.2s ease-out, font-weight 0.2s ease-out";
-          const isActive = Math.abs(x - radius) < 20;
+          const isActive = Math.abs(x - responsiveRadius) < 20;
 
           navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${
             isActive ? 1.8 : 1.5
@@ -71,13 +83,12 @@ export default function VinylNavigation() {
     };
 
     frameId = requestAnimationFrame(updateRotation);
-
     return () => cancelAnimationFrame(frameId);
-  }, []);
+  }, [viewportHeight]);
 
   return (
     <div
-      className="h-[300vh] w-full flex flex-col items-center justify-center relative overflow-hidden"
+      className="min-h-[300vh] w-full flex flex-col items-center justify-center relative overflow-hidden"
       style={{
         background:
           "radial-gradient(circle at 50% 25%, #2b3a55, #1e2a44, #131b33, #0b132b)",
@@ -91,12 +102,14 @@ export default function VinylNavigation() {
         {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
       </button>
 
-      <div className="fixed top-1/2 left-[-20%] translate-y-[-50%] w-[70vh] h-[70vh] flex items-center justify-center">
+      {/* Vinyl */}
+      <div className="fixed top-1/2 left-[-35vmin] -translate-y-1/2 w-[60vmin] h-[60vmin] flex items-center justify-center">
         <div
           ref={vinylRef}
           className="w-full h-full rounded-full bg-cover bg-center shadow-2xl transition-transform duration-300 ease-out"
           style={{ backgroundImage: "url('/vinyl_texture.png')" }}
         ></div>
+
         {NAV_OPTIONS.map((option, index) => (
           <button
             key={option}
@@ -128,20 +141,15 @@ export default function VinylNavigation() {
         ))}
       </div>
 
+      {/* Descriptions */}
       <div className="absolute top-0 right-[5vw] w-[50vw] h-[300vh] flex flex-col justify-start items-start pt-20">
         {NAV_OPTIONS.map((option, index) => {
           const isActive = activeIndex === index;
           let offset = (index + 1) * 60;
 
-          if (option === "Home") {
-            offset = -70;
-          } else if (option === "Projects" && activeIndex >= 0) {
-            offset = -70;
-          }
-
-          if (option === "brian_rot" && activeIndex >= 1) {
-            offset = 60;
-          }
+          if (option === "Home") offset = -70;
+          else if (option === "Projects" && activeIndex >= 0) offset = -70;
+          else if (option === "brian_rot" && activeIndex >= 1) offset = 60;
 
           return (
             <div
