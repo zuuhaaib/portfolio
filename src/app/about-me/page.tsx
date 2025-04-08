@@ -94,8 +94,6 @@ const AboutPage: React.FC = () => {
             finding yourself, but so far, all I’ve found is an overwhelming pile
             of programming assignments, an ever-growing list of debugging
             nightmares, and a deep appreciation for well-placed semicolons.
-            Somewhere along the way, I picked up a caffeine addiction and a
-            habit of questioning my life choices at 3 AM.
           </p>
           <p className="mb-4">
             Somewhere along the way, I’ve pulled all-nighters that turned into
