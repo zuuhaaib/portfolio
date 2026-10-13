@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import { useAudio } from "@/context/AudioContext";
 
@@ -26,20 +27,27 @@ export default function VinylNavigation() {
   const vinylRef = useRef<HTMLDivElement>(null);
   const navRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const smoothScrollRef = useRef(0);
+
   const [activeIndex, setActiveIndex] = useState(0);
-  const { isMuted, toggleMute } = useAudio();
-  const router = useRouter();
   const [viewportHeight, setViewportHeight] = useState(0);
   const [windowWidth, setWindowWidth] = useState(0);
+
+  const { isMuted, toggleMute } = useAudio();
+  const router = useRouter();
 
   useEffect(() => {
     const handleResize = () => {
       setViewportHeight(window.innerHeight);
       setWindowWidth(window.innerWidth);
     };
+
     handleResize();
+
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -50,7 +58,10 @@ export default function VinylNavigation() {
         (window.scrollY - smoothScrollRef.current) * 0.1;
 
       const maxScroll = document.body.scrollHeight - viewportHeight;
-      const scrollFraction = Math.min(smoothScrollRef.current / maxScroll, 1);
+
+      const scrollFraction =
+        maxScroll > 0 ? Math.min(smoothScrollRef.current / maxScroll, 1) : 0;
+
       const totalRotation = scrollFraction * 720;
 
       if (vinylRef.current) {
@@ -64,49 +75,58 @@ export default function VinylNavigation() {
       let closestDistance = Infinity;
 
       navRefs.current.forEach((navItem, index) => {
-        if (navItem) {
-          const baseAngle =
-            (index / VINYL_LAYOUT_ORDER.length) * Math.PI * 2 - Math.PI / 2;
-          const dynamicAngle = baseAngle + (slowedRotation * Math.PI) / 180;
+        if (!navItem) return;
 
-          const radius =
-            windowWidth < 768
-              ? Math.min(windowWidth, 600) * 0.35
-              : Math.min(windowWidth, 1200) * 0.25;
+        const baseAngle =
+          (index / VINYL_LAYOUT_ORDER.length) * Math.PI * 2 - Math.PI / 2;
 
-          const x = radius * Math.cos(dynamicAngle);
-          const y = radius * Math.sin(dynamicAngle);
+        const dynamicAngle = baseAngle + (slowedRotation * Math.PI) / 180;
 
-          const distanceToRight = Math.abs(x - radius);
-          if (distanceToRight < closestDistance) {
-            closestDistance = distanceToRight;
-            closestIndex = index;
-          }
+        const radius =
+          windowWidth < 768
+            ? Math.min(windowWidth, 600) * 0.35
+            : Math.min(windowWidth, 1200) * 0.25;
 
-          navItem.style.transition =
-            "transform 0.2s ease-out, color 0.2s ease-out, font-weight 0.2s ease-out";
-          navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+        const x = radius * Math.cos(dynamicAngle);
+        const y = radius * Math.sin(dynamicAngle);
+
+        const distanceToRight = Math.abs(x - radius);
+
+        if (distanceToRight < closestDistance) {
+          closestDistance = distanceToRight;
+          closestIndex = index;
         }
+
+        navItem.style.transition =
+          "transform 0.2s ease-out, color 0.2s ease-out, font-weight 0.2s ease-out";
+
+        navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
       });
 
       setActiveIndex(NAV_OPTIONS.indexOf(VINYL_LAYOUT_ORDER[closestIndex]));
 
       navRefs.current.forEach((navItem, index) => {
-        if (navItem) {
-          const isActive = index === closestIndex;
-          const scale =
-            windowWidth < 768 ? (isActive ? 1.5 : 1.2) : isActive ? 1.8 : 1.5;
-          navItem.style.transform += ` scale(${scale})`;
-          navItem.style.color = isActive ? "#FFD700" : "#6B7A99";
-          navItem.style.fontWeight = isActive ? "bold" : "normal";
-        }
+        if (!navItem) return;
+
+        const isActive = index === closestIndex;
+
+        const scale =
+          windowWidth < 768 ? (isActive ? 1.5 : 1.2) : isActive ? 1.8 : 1.5;
+
+        navItem.style.transform += ` scale(${scale})`;
+
+        navItem.style.color = isActive ? "#FFD700" : "#6B7A99";
+        navItem.style.fontWeight = isActive ? "bold" : "normal";
       });
 
       frameId = requestAnimationFrame(updateRotation);
     };
 
     frameId = requestAnimationFrame(updateRotation);
-    return () => cancelAnimationFrame(frameId);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
   }, [viewportHeight, windowWidth]);
 
   const getRoutePath = (option: string): string => {
@@ -134,19 +154,61 @@ export default function VinylNavigation() {
     >
       {/* Mute Button */}
       <button
-        className="absolute top-4 right-4 p-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 transition z-50"
+        className="
+          absolute top-4 right-4 z-50
+          cursor-pointer
+          rounded-full
+          bg-gray-800
+          p-3
+          text-white
+          shadow-lg
+          transition
+          hover:bg-gray-700
+          hover:scale-110
+        "
         onClick={toggleMute}
+        aria-label={isMuted ? "Unmute audio" : "Mute audio"}
       >
         {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
       </button>
+
+      {/* Interaction Hint */}
+      <motion.p
+        className="
+          fixed bottom-5 left-5 z-40
+          rounded-full
+          border border-white/10
+          bg-black/20
+          px-4 py-2
+          text-xs md:text-sm
+          text-gray-400
+          backdrop-blur-sm
+          pointer-events-none
+        "
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1, duration: 0.5 }}
+      >
+        scroll around • click something eventually
+      </motion.p>
 
       {/* Vinyl */}
       <div className="fixed top-1/2 left-[5vw] md:left-[-30vmin] -translate-y-1/2 w-[80vmin] h-[80vmin] md:w-[60vmin] md:h-[60vmin] flex items-center justify-center">
         <div
           ref={vinylRef}
-          className="w-full h-full rounded-full bg-cover bg-center shadow-2xl transition-transform duration-300 ease-out"
-          style={{ backgroundImage: "url('/vinyl_texture.png')" }}
-        ></div>
+          className="
+            w-full h-full
+            rounded-full
+            bg-cover bg-center
+            shadow-2xl
+            transition-transform
+            duration-300
+            ease-out
+          "
+          style={{
+            backgroundImage: "url('/vinyl_texture.png')",
+          }}
+        />
 
         {VINYL_LAYOUT_ORDER.map((option, index) => (
           <button
@@ -155,14 +217,45 @@ export default function VinylNavigation() {
               navRefs.current[index] = el;
             }}
             onClick={() => router.push(getRoutePath(option))}
-            className="absolute text-base md:text-lg font-semibold shadow-lg transition-all ease-out duration-200 z-10"
+            className="
+              group
+              absolute
+              z-10
+              cursor-pointer
+              rounded-full
+              px-3 py-2
+              text-base md:text-lg
+              font-semibold
+              shadow-lg
+              transition-all
+              duration-200
+              ease-out
+              hover:bg-yellow-400/10
+              hover:shadow-[0_0_20px_rgba(250,204,21,0.35)]
+            "
             style={{
               left: "50%",
               top: "50%",
               transform: "translate(-50%, -50%)",
             }}
           >
-            {option}
+            <span className="flex items-center gap-2 whitespace-nowrap">
+              {option}
+
+              <span
+                className="
+                  text-xs
+                  opacity-0
+                  -translate-x-1
+                  transition-all
+                  duration-200
+                  group-hover:opacity-100
+                  group-hover:translate-x-0
+                "
+              >
+                ↗
+              </span>
+            </span>
           </button>
         ))}
       </div>
@@ -175,13 +268,22 @@ export default function VinylNavigation() {
           return (
             <div
               key={option}
-              className={`w-full p-4 md:p-6 mb-6 transition-opacity duration-300 ease-in-out transform transition-transform ${
-                isActive ? "opacity-100 scale-105" : "opacity-40 scale-100"
-              }`}
+              className={`
+                w-full
+                p-4 md:p-6
+                mb-6
+                transition-opacity
+                duration-300
+                ease-in-out
+                transform
+                transition-transform
+                ${isActive ? "opacity-100 scale-105" : "opacity-40 scale-100"}
+              `}
             >
               <h2 className="text-2xl md:text-3xl font-bold text-white">
                 {option}
               </h2>
+
               <p className="text-base md:text-lg text-gray-300">
                 {
                   SECTION_PLACEHOLDERS[
@@ -199,6 +301,7 @@ export default function VinylNavigation() {
                   className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
+
               {option === "About Me" && (
                 <Image
                   src="/jake.jpg"
@@ -208,6 +311,7 @@ export default function VinylNavigation() {
                   className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
+
               {option === "Projects" && (
                 <Image
                   src="/sadge.jpg"
@@ -217,6 +321,7 @@ export default function VinylNavigation() {
                   className="mt-4 rounded-lg shadow-lg mx-auto"
                 />
               )}
+
               {option === "brian_rot" && (
                 <Image
                   src="/brian.jpg"
