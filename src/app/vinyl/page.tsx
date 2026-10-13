@@ -118,7 +118,7 @@ export default function VinylNavigation() {
       case "About Me":
         return "/about-me";
       case "Projects":
-        return "/coming-soon";
+        return "/projects";
       default:
         return `/${option.toLowerCase().replace(/ /g, "-")}`;
     }
