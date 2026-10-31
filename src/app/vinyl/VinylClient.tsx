@@ -70,21 +70,39 @@ const ACTIVE_SCALE = 1.4;
 const IDLE_SCALE = 1.15;
 const EDGE_MARGIN = 24;
 
-type Geometry = { radius: number; centerX: number };
+// Labels start spread evenly, with Home just above the "active" spot
+const START_OFFSET = -135;
+// Labels fade out over this many degrees before wrapping around the back
+const WRAP_FADE = 20;
 
-// Lays the wheel out so the whole label orbit fits in the left half of the
-// screen: the disc can be big, but no label ever rotates off-screen.
+type Geometry = { radius: number; discSize: number; maxArc: number };
+
+// The disc sits half off the left edge (centered on x = 0). Labels orbit it
+// on a virtual full circle that gets squeezed onto the visible right-hand
+// arc, so every label stays on-screen while the disc stays half hidden.
 function computeGeometry(labels: (HTMLElement | null)[]): Geometry {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+  const vmin = Math.min(window.innerWidth, window.innerHeight);
+  const discSize = vmin * 0.6;
+  const radius = (discSize / 2) / 0.9;
+
   const widest = Math.max(80, ...labels.map((el) => el?.offsetWidth ?? 0));
-  const labelHalf = (widest * ACTIVE_SCALE) / 2;
-  const region = width * 0.5;
-  const radius = Math.max(
-    120,
-    Math.min((region - 2 * (labelHalf + EDGE_MARGIN)) / 2, height * 0.38)
+  const tallest = Math.max(40, ...labels.map((el) => el?.offsetHeight ?? 0));
+  const labelHalf = (widest * IDLE_SCALE) / 2;
+  const labelHalfHeight = (tallest * ACTIVE_SCALE) / 2;
+
+  // Furthest a label can swing up/down before it would clip the left edge
+  // or the top/bottom of the screen
+  const fromEdge = Math.acos(Math.min(1, (labelHalf + EDGE_MARGIN) / radius));
+  const fromHeight = Math.asin(
+    Math.min(
+      1,
+      Math.max(0, window.innerHeight / 2 - labelHalfHeight - EDGE_MARGIN) /
+        radius
+    )
   );
-  return { radius, centerX: EDGE_MARGIN + labelHalf + radius };
+  const maxArc = Math.min(fromEdge, fromHeight, (80 * Math.PI) / 180);
+
+  return { radius, discSize, maxArc };
 }
 
 export default function VinylClient() {
@@ -136,19 +154,22 @@ export default function VinylClient() {
 
       const textMultiplier = 0.4;
       const slowedRotation = totalRotation * textMultiplier;
-      const { radius } = geometry;
+      const { radius, maxArc } = geometry;
 
       let closestIndex = 0;
       let closestDistance = Infinity;
-      const positions: { x: number; y: number }[] = [];
+      const positions: { x: number; y: number; opacity: number }[] = [];
 
       WHEEL_ITEMS.forEach((_, index) => {
-        const baseAngle =
-          (index / WHEEL_ITEMS.length) * Math.PI * 2 - Math.PI / 2;
-        const dynamicAngle = baseAngle + (slowedRotation * Math.PI) / 180;
+        // Angle on the virtual circle, in degrees, 0 = pointing right
+        const virtual =
+          (index / WHEEL_ITEMS.length) * 360 + START_OFFSET + slowedRotation;
+        const wrapped = ((((virtual + 180) % 360) + 360) % 360) - 180;
+        const dynamicAngle = (wrapped / 180) * maxArc;
         const x = radius * Math.cos(dynamicAngle);
         const y = radius * Math.sin(dynamicAngle);
-        positions.push({ x, y });
+        const opacity = Math.min(1, (180 - Math.abs(wrapped)) / WRAP_FADE);
+        positions.push({ x, y, opacity });
 
         const distanceToRight = Math.abs(x - radius);
         if (distanceToRight < closestDistance) {
@@ -160,10 +181,12 @@ export default function VinylClient() {
       navRefs.current.forEach((navItem, index) => {
         if (!navItem) return;
         const isActive = index === closestIndex;
-        const { x, y } = positions[index];
+        const { x, y, opacity } = positions[index];
         const scale = isActive ? ACTIVE_SCALE : IDLE_SCALE;
 
         navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`;
+        navItem.style.opacity = String(opacity);
+        navItem.style.pointerEvents = opacity < 0.3 ? "none" : "";
         navItem.style.color = isActive ? "#FFD700" : "#6B7A99";
         navItem.style.fontWeight = isActive ? "bold" : "normal";
       });
@@ -193,7 +216,7 @@ export default function VinylClient() {
     };
   }, [geometry]);
 
-  const discSize = geometry ? geometry.radius * 1.8 : 0;
+  const discSize = geometry?.discSize ?? 0;
 
   return (
     <div
@@ -231,7 +254,7 @@ export default function VinylClient() {
         aria-label="Sections"
         className="hidden lg:flex fixed top-1/2 -translate-y-1/2 items-center justify-center"
         style={{
-          left: geometry ? geometry.centerX - discSize / 2 : 0,
+          left: -discSize / 2,
           width: discSize,
           height: discSize,
           visibility: geometry ? "visible" : "hidden",
