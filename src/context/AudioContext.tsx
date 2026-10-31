@@ -2,12 +2,12 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
+  useEffect,
+  useRef,
   useState,
   ReactNode,
-  useRef,
-  useEffect,
-  useMemo,
 } from "react";
 
 interface AudioContextProps {
@@ -21,46 +21,46 @@ interface AudioContextProps {
 
 const AudioContext = createContext<AudioContextProps | undefined>(undefined);
 
+const songs = [
+  "/music/Reelin.mp3",
+  "/music/Lonely.mp3",
+  "/music/gas.mp3",
+  "/music/feather.mp3",
+];
+
 export const AudioProvider = ({ children }: { children: ReactNode }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.35); // Set initial volume to 35%
-  const [currentSong, setCurrentSong] = useState<string | null>(null);
+  const isMutedRef = useRef(false);
+  // Created on first play, so no song downloads until someone asks for one
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Memoize the list of songs to avoid unnecessary re-renders
-  const songs = useMemo(
-    () => [
-      "/music/Reelin.mp3",
-      "/music/Lonely.mp3",
-      "/music/gas.mp3",
-      "/music/feather.mp3",
-    ],
-    []
-  );
-
-  // Set a random song when the vinyl mounts
-  useEffect(() => {
-    const getRandomSong = () => {
-      const randomIndex = Math.floor(Math.random() * songs.length);
-      return songs[randomIndex];
-    };
-
-    const randomSong = getRandomSong();
-    setCurrentSong(randomSong);
-  }, [songs]);
-
-  const toggleMute = () => {
-    setIsMuted((prev) => !prev);
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted; // Toggle mute
+  const getAudio = () => {
+    if (!audioRef.current) {
+      const song = songs[Math.floor(Math.random() * songs.length)];
+      const audio = new Audio(song);
+      audio.loop = true;
+      audio.muted = isMutedRef.current;
+      audioRef.current = audio;
     }
+    return audioRef.current;
   };
 
-  const playAudio = () => {
+  const toggleMute = useCallback(() => {
+    const next = !isMutedRef.current;
+    isMutedRef.current = next;
+    setIsMuted(next);
     if (audioRef.current) {
-      audioRef.current.volume = volume;
-      audioRef.current.play();
+      audioRef.current.muted = next;
     }
+  }, []);
+
+  const playAudio = () => {
+    const audio = getAudio();
+    audio.volume = volume;
+    audio.play().catch(() => {
+      // Autoplay blocked or file missing; nothing useful to do here
+    });
   };
 
   const stopAudio = () => {
@@ -70,16 +70,16 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  if (audioRef.current) {
-    audioRef.current.volume = volume;
-  }
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
 
   return (
     <AudioContext.Provider
       value={{ isMuted, toggleMute, playAudio, stopAudio, volume, setVolume }}
     >
-      {/* Only render the audio element once a valid song is selected */}
-      {currentSong && <audio ref={audioRef} src={currentSong} loop />}
       {children}
     </AudioContext.Provider>
   );

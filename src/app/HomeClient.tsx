@@ -1,11 +1,9 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, useAnimations } from "@react-three/drei";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import * as THREE from "three";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { useAudio } from "@/context/AudioContext";
 import {
@@ -16,17 +14,38 @@ import {
   FaVolumeMute,
 } from "react-icons/fa";
 
+// three.js and the model only load on the client, after the text is up
+const Turntable = dynamic(() => import("@/components/Turntable"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center">
+      <div
+        className="h-40 w-40 rounded-full bg-gray-900/80 shadow-2xl ring-8 ring-gray-800/60 motion-safe:animate-spin"
+        style={{ animationDuration: "3s" }}
+        aria-hidden="true"
+      />
+    </div>
+  ),
+});
+
 export default function HomeClient() {
   const [showButton, setShowButton] = useState(false);
   const [showMessage, setShowMessage] = useState(true);
   const { isMuted, toggleMute, playAudio, stopAudio } = useAudio();
   const router = useRouter();
 
-  const handleClick = () => {
-    if (isMuted) {
-      stopAudio();
-    } else {
+  // Desktop warms the model up early; phones wait until the canvas is on screen
+  useEffect(() => {
+    if (window.matchMedia("(min-width: 768px)").matches) {
+      import("@/components/Turntable").then((m) => m.preloadTurntableModel());
+    }
+  }, []);
+
+  const handleToggle = (playing: boolean) => {
+    if (playing) {
       playAudio();
+    } else {
+      stopAudio();
     }
   };
 
@@ -104,15 +123,11 @@ export default function HomeClient() {
 
       {/* Right Section: 3D Vinyl */}
       <div className="h-[45vh] w-full md:h-full md:w-1/2">
-        <Canvas camera={{ position: [0, 2, 4], fov: 40 }}>
-          <ambientLight intensity={1} />
-          <directionalLight position={[2, 5, 2]} intensity={1.5} />
-          <VinylPlayer
-            setShowButton={setShowButton}
-            setShowMessage={setShowMessage}
-            handleClick={handleClick}
-          />
-        </Canvas>
+        <Turntable
+          setShowButton={setShowButton}
+          setShowMessage={setShowMessage}
+          onToggle={handleToggle}
+        />
       </div>
 
       {/* Show message before clicking */}
@@ -147,54 +162,4 @@ export default function HomeClient() {
       )}
     </div>
   );
-}
-
-function VinylPlayer({
-  setShowButton,
-  setShowMessage,
-  handleClick,
-}: {
-  setShowButton: React.Dispatch<React.SetStateAction<boolean>>;
-  setShowMessage: React.Dispatch<React.SetStateAction<boolean>>;
-  handleClick: () => void;
-}) {
-  const { scene, animations } = useGLTF("/vinyl_player.glb");
-  const { actions } = useAnimations(animations, scene);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const targetCameraPosition = useRef(new THREE.Vector3(0, 2, 4));
-
-  useFrame(({ camera }) => {
-    camera.position.lerp(targetCameraPosition.current, 0.05);
-    camera.lookAt(0, 0, 0);
-  });
-
-  const handleVinylClick = () => {
-    handleClick();
-    if (actions && Object.values(actions).length > 0) {
-      Object.values(actions).forEach((action) =>
-        isPlaying ? action?.stop() : action?.play()
-      );
-      setIsPlaying(!isPlaying);
-      targetCameraPosition.current.set(
-        0,
-        isPlaying ? 2 : 3.5,
-        isPlaying ? 4 : 2
-      );
-      setTimeout(() => {
-        setShowButton(!isPlaying);
-        setShowMessage(false);
-      }, 500);
-    } else {
-      setShowButton(false);
-      setShowMessage(true);
-    }
-  };
-
-  useEffect(() => {
-    if (actions && Object.values(actions).length > 0) {
-      Object.values(actions).forEach((action) => action?.stop());
-    }
-  }, [actions]);
-
-  return <primitive object={scene} scale={0.02} onClick={handleVinylClick} />;
 }
