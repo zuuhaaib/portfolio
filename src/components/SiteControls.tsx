@@ -16,7 +16,7 @@ export default function SiteControls() {
         <Link
           href="/"
           aria-label="Go home"
-          className="fixed top-4 left-4 z-50 rounded-lg bg-yellow-500 p-3 text-black shadow-lg transition hover:scale-110 hover:bg-yellow-600"
+          className="fixed top-4 left-4 z-50 rounded-full bg-ink px-4 py-3 text-paper transition hover:-translate-y-0.5 hover:bg-blue hover:text-paper active:translate-y-0"
         >
           <FaHome size={20} aria-hidden="true" />
         </Link>
@@ -27,7 +27,7 @@ export default function SiteControls() {
         onClick={toggleMute}
         aria-label={isMuted ? "Unmute music" : "Mute music"}
         aria-pressed={isMuted}
-        className="fixed top-4 right-4 z-50 cursor-pointer rounded-full bg-gray-800 p-3 text-white shadow-lg transition hover:scale-110 hover:bg-gray-700"
+        className="fixed top-4 right-4 z-50 cursor-pointer rounded-full bg-ink px-4 py-3 text-paper transition hover:-translate-y-0.5 hover:bg-blue hover:text-paper active:translate-y-0"
       >
         {isMuted ? (
           <FaVolumeMute size={20} aria-hidden="true" />

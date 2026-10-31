@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque } from "next/font/google";
 import { AudioProvider } from "@/context/AudioContext";
 import SiteControls from "@/components/SiteControls";
 import Providers from "@/components/Providers";
+import Reveals from "@/components/Reveals";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
 });
 
@@ -52,14 +48,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html
+      lang="en"
+      className={bricolage.variable}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Lets entrance animations hide content only when script runs */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "document.documentElement.classList.add('js')",
+          }}
+        />
+      </head>
+      <body className="antialiased">
         <Providers>
           <AudioProvider>
             <SiteControls />
             {children}
+            <Reveals />
             <Analytics />
           </AudioProvider>
         </Providers>

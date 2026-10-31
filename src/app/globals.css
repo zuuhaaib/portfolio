@@ -1,36 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  A risograph zine: newsprint paper, black ink, and two riso drums, the
+  sunflower yellow and the medium blue. Photos keep their own colours.
+*/
+@theme {
+  --color-paper: #ebecea;
+  --color-paper-2: #dfe0dd;
+  --color-ink: #161616;
+  --color-ink-soft: #5c5a55;
+  --color-sun: #ffb511;
+  --color-blue: #2d4fa0;
+
+  --font-sans: var(--font-bricolage), system-ui, sans-serif;
+
+  /* Five steps: small, body, lead, head, poster */
+  --text-fine: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --text-fine--line-height: 1.45;
+  --text-body: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+  --text-body--line-height: 1.5;
+  --text-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --text-lead--line-height: 1.3;
+  --text-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --text-head--line-height: 0.95;
+  --text-poster: clamp(3.75rem, 0.6rem + 8.4vw, 10rem);
+  --text-poster--line-height: 0.88;
+
+  --radius-frame: 4px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-/* One visible focus style for every custom link and button */
 @layer base {
+  html {
+    background: var(--color-paper);
+  }
+
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.5;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 700;
+    letter-spacing: -0.045em;
+  }
+
+  ::selection {
+    background: var(--color-sun);
+    color: var(--color-ink);
+  }
+
+  /* Ink outline reads on paper and yellow; the inner ring reads on ink/blue */
   a:focus-visible,
   button:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid #facc15;
+    outline: 3px solid var(--color-ink);
     outline-offset: 3px;
+    box-shadow: 0 0 0 2px var(--color-paper); /* taste-skill-ignore: focus state, not at rest */
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Entrances: hidden only once the script has said it can reveal them */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+
+.js .reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/* With reduced motion nothing waits to be revealed */
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }

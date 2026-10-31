@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 type Section = {
   label: string;
@@ -15,7 +14,7 @@ type Section = {
 // Display Order
 const SECTIONS: Section[] = [
   {
-    label: "Home",
+    label: "home",
     href: "/",
     description:
       "Well, I feel like it's pretty self-explanatory. But clicking on this will take you back to the homepage (no way!!). I'm just yapping so that there's no dead space here. Maybe I should add a funny image at the bottom.",
@@ -26,7 +25,7 @@ const SECTIONS: Section[] = [
     },
   },
   {
-    label: "About Me",
+    label: "about me",
     href: "/about-me",
     description:
       "Find out more about me! My background, my journey (emotional) and why I am the way I am (not really). Here's a fun fact - I recently found out that cows have accents depending on where they're born, and they also have best friends and get depressed when separated (I believe everything I see on the internet).",
@@ -37,7 +36,7 @@ const SECTIONS: Section[] = [
     },
   },
   {
-    label: "Projects",
+    label: "projects",
     href: "/projects",
     description:
       "Projects I've worked on or am currently working on. Most of the projects have been the result of not sleeping on time, procrastinating, or maybe someone at a party said 'I have an idea for an app' (pls no more of this).",
@@ -61,7 +60,7 @@ const SECTIONS: Section[] = [
 ];
 
 // Vinyl Layout Order (for button positions)
-const VINYL_LAYOUT_ORDER = ["About Me", "Home", "brian_rot", "Projects"];
+const VINYL_LAYOUT_ORDER = ["about me", "home", "brian_rot", "projects"];
 const WHEEL_ITEMS = VINYL_LAYOUT_ORDER.map(
   (label) => SECTIONS.find((s) => s.label === label)!
 );
@@ -187,8 +186,9 @@ export default function VinylClient() {
         navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`;
         navItem.style.opacity = String(opacity);
         navItem.style.pointerEvents = opacity < 0.3 ? "none" : "";
-        navItem.style.color = isActive ? "#FFD700" : "#6B7A99";
-        navItem.style.fontWeight = isActive ? "bold" : "normal";
+        // Labels sit on paper pills so they read over the black disc; the
+        // one under the needle gets the sunflower drum
+        navItem.style.backgroundColor = isActive ? "#ffb511" : "#ebecea";
       });
 
       const nextActive = SECTIONS.indexOf(WHEEL_ITEMS[closestIndex]);
@@ -219,40 +219,11 @@ export default function VinylClient() {
   const discSize = geometry?.discSize ?? 0;
 
   return (
-    <div
-      className="min-h-screen lg:min-h-[300vh] w-full relative overflow-x-hidden"
-      style={{
-        background:
-          "radial-gradient(circle at 50% 25%, #2b3a55, #1e2a44, #131b33, #0b132b)",
-      }}
-    >
-      <h1 className="sr-only">explore</h1>
-
-      {/* Interaction Hint */}
-      <motion.p
-        className="
-          hidden lg:block
-          fixed bottom-5 left-5 z-40
-          rounded-full
-          border border-white/10
-          bg-black/20
-          px-4 py-2
-          text-sm
-          text-gray-400
-          backdrop-blur-sm
-          pointer-events-none
-        "
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.5 }}
-      >
-        scroll around • click something eventually
-      </motion.p>
-
+    <div className="relative min-h-svh w-full overflow-x-hidden bg-paper lg:min-h-[300vh]">
       {/* Vinyl (desktop) */}
       <nav
         aria-label="Sections"
-        className="hidden lg:flex fixed top-1/2 -translate-y-1/2 items-center justify-center"
+        className="fixed top-1/2 hidden -translate-y-1/2 items-center justify-center lg:flex"
         style={{
           left: -discSize / 2,
           width: discSize,
@@ -262,15 +233,7 @@ export default function VinylClient() {
       >
         <div
           ref={vinylRef}
-          className="
-            w-full h-full
-            rounded-full
-            bg-cover bg-center
-            shadow-2xl
-            motion-safe:transition-transform
-            motion-safe:duration-300
-            motion-safe:ease-out
-          "
+          className="h-full w-full rounded-full bg-cover bg-center"
           style={{
             backgroundImage: "url('/vinyl_texture.png')",
           }}
@@ -284,43 +247,20 @@ export default function VinylClient() {
             ref={(el) => {
               navRefs.current[index] = el;
             }}
-            className="
-              group
-              absolute
-              z-10
-              cursor-pointer
-              rounded-full
-              px-3 py-2
-              text-lg
-              font-semibold
-              shadow-lg
-              motion-safe:transition-[transform,color,background-color,box-shadow]
-              duration-200
-              ease-out
-              hover:bg-yellow-400/10
-              hover:shadow-[0_0_20px_rgba(250,204,21,0.35)]
-            "
+            className="group absolute z-10 cursor-pointer rounded-full px-4 py-1 text-lead font-medium tracking-[-0.03em] hover:underline motion-safe:transition-[transform,color,background-color] motion-safe:duration-200 motion-safe:ease-out"
             style={{
               left: "50%",
               top: "50%",
               transform: "translate(-50%, -50%)",
-              color: "#6B7A99",
+              color: "#161616",
+              backgroundColor: "#ebecea",
             }}
           >
             <span className="flex items-center gap-2 whitespace-nowrap">
               {section.label}
-
               <span
                 aria-hidden="true"
-                className="
-                  text-xs
-                  opacity-0
-                  -translate-x-1
-                  transition-all
-                  duration-200
-                  group-hover:opacity-100
-                  group-hover:translate-x-0
-                "
+                className="-translate-x-1 text-fine opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100"
               >
                 ↗
               </span>
@@ -329,72 +269,93 @@ export default function VinylClient() {
         ))}
       </nav>
 
-      {/* Descriptions (desktop) */}
-      <div className="hidden lg:flex absolute top-0 right-[4vw] w-[44vw] h-[300vh] flex-col justify-start items-start pt-[10vh]">
-        {SECTIONS.map((section, index) => {
-          const isActive = activeIndex === index;
+      {/* Title, for both layouts */}
+      <header className="px-4 pt-24 md:px-8 lg:absolute lg:right-8 lg:top-0 lg:z-10 lg:w-[52vw] lg:px-0 lg:pt-28">
+        <h1 className="text-poster">pick a side</h1>
+        <p className="mt-4 max-w-md text-lead lg:mt-6">
+          <span className="lg:hidden">
+            four places to go. tap whichever one sounds least concerning.
+          </span>
+          <span className="hidden lg:inline">
+            scroll to spin the record. click a label when one looks good.
+          </span>
+        </p>
+      </header>
 
-          return (
-            <div
-              key={section.label}
-              className={`
-                w-full
-                p-6
-                mb-6
-                transition-[opacity,transform]
-                duration-300
-                ease-in-out
-                ${isActive ? "opacity-100 scale-105" : "opacity-40 scale-100"}
-              `}
-            >
-              <h2 className="text-3xl font-bold text-white">
-                {section.label}
-              </h2>
+      {/* Liner notes (desktop) */}
+      <div className="absolute right-8 top-0 hidden h-[300vh] w-[52vw] flex-col items-stretch pt-[25rem] lg:flex">
+        <div className="flex flex-col gap-8">
+          {SECTIONS.map((section, index) => {
+            const isActive = activeIndex === index;
 
-              <p className="text-lg text-gray-300">{section.description}</p>
+            return (
+              <Link
+                key={section.label}
+                href={section.href}
+                className={`group grid grid-cols-[1fr_auto] items-start gap-8 py-4 transition-opacity duration-700 ease-out motion-reduce:transition-none ${
+                  isActive ? "opacity-100" : "opacity-35 hover:opacity-70"
+                }`}
+              >
+                <div>
+                  <h2 className="flex items-center gap-4 text-head group-hover:underline group-hover:decoration-2 group-hover:underline-offset-8">
+                    <span
+                      aria-hidden="true"
+                      className={`h-[0.4em] w-[0.4em] shrink-0 rounded-full bg-sun transition-[transform,opacity] duration-500 ease-out motion-reduce:transition-none ${
+                        isActive ? "scale-100 opacity-100" : "scale-50 opacity-0"
+                      }`}
+                    />
+                    {section.label}
+                  </h2>
+                  <p className="mt-4 max-w-[52ch]">{section.description}</p>
+                </div>
 
-              <Image
-                src={section.image.src}
-                alt={section.image.alt}
-                width={section.image.size}
-                height={section.image.size}
-                className="mt-4 rounded-lg shadow-lg mx-auto"
-              />
-            </div>
-          );
-        })}
+                <div className="w-40 overflow-hidden rounded-frame xl:w-48">
+                  <Image
+                    src={section.image.src}
+                    alt={section.image.alt}
+                    width={section.image.size}
+                    height={section.image.size}
+                    className="aspect-square w-full object-cover"
+                  />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* Plain list (mobile / tablet) */}
-      <ul className="lg:hidden flex flex-col gap-6 px-4 pt-24 pb-12">
-        {SECTIONS.map((section) => (
-          <li key={section.label}>
-            <Link
-              href={section.href}
-              className="block rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:bg-white/[0.06]"
-            >
-              <h2 className="flex items-center gap-2 text-2xl font-bold text-yellow-400">
-                {section.label}
-                <span aria-hidden="true" className="text-base">
-                  ↗
-                </span>
-              </h2>
+      <div className="px-4 pb-12 md:px-8 lg:hidden">
+        <ul className="mt-14 flex flex-col gap-16">
+          {SECTIONS.map((section) => (
+            <li key={section.label}>
+              <Link
+                href={section.href}
+                className="group block transition active:translate-y-px"
+              >
+                <h2 className="flex items-center gap-2 text-head group-hover:underline group-hover:decoration-2 group-hover:underline-offset-8">
+                  {section.label}
+                  <span aria-hidden="true" className="text-lead">
+                    ↗
+                  </span>
+                </h2>
 
-              <p className="mt-2 text-base text-gray-300">
-                {section.description}
-              </p>
+                <p className="mt-3">{section.description}</p>
 
-              <Image
-                src={section.image.src}
-                alt={section.image.alt}
-                width={section.image.size}
-                height={section.image.size}
-                className="mt-4 rounded-lg shadow-lg mx-auto h-auto w-auto max-h-56"
-              />
-            </Link>
-          </li>
-        ))}
-      </ul>
+                <div className="mt-5 overflow-hidden rounded-frame">
+                  <Image
+                    src={section.image.src}
+                    alt={section.image.alt}
+                    width={section.image.size}
+                    height={section.image.size}
+                    className="aspect-[4/3] w-full object-cover"
+                  />
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

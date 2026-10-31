@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import Image from "next/image";
 import { FaGithub } from "react-icons/fa";
 import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 
@@ -20,156 +20,158 @@ const projects = [
     live: "https://real-talk-tracker.vercel.app",
     github: "https://github.com/zuuhaaib/RealTalkTracker",
     note: "therapy was apparently too expensive",
+    screens: [
+      {
+        src: "/projects/rtt-hero.webp",
+        alt: "RealTalkTracker landing page asking who's actually carrying the chat",
+      },
+      {
+        src: "/projects/rtt-chat.webp",
+        alt: "A sample chat between alex and sam about a sandwich, shown on RealTalkTracker",
+      },
+      {
+        src: "/projects/rtt-stats.webp",
+        alt: "RealTalkTracker sample findings: message share, median reply gap and the AI's pick for the funny one",
+      },
+    ],
   },
 ];
 
+const pill =
+  "inline-flex items-center gap-2 rounded-full px-5 py-3 font-medium transition hover:-translate-y-0.5 active:translate-y-0";
+
 export default function ProjectsClient() {
   return (
-    <main className="min-h-screen bg-[#131b33] text-white px-6 py-20">
-      <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <motion.div
-          className="text-center mb-16"
-          initial={{ opacity: 0, y: -25 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+    <main className="pb-24 md:pb-32">
+      {/* Title and what this page is */}
+      <header className="grid items-end gap-6 px-4 pt-28 md:grid-cols-12 md:px-8 md:pt-36">
+        <h1 className="reveal text-poster md:col-span-7">projects</h1>
+        <p
+          className="reveal max-w-[34ch] text-lead md:col-span-5"
+          style={{ "--i": 1 } as React.CSSProperties}
         >
-          <p className="text-yellow-400 text-sm font-bold tracking-[0.25em] uppercase mb-4">
-            things i made instead of sleeping
-          </p>
+          things i made instead of sleeping. software experiments,
+          questionable ideas, and things that somehow survived long enough to
+          make it onto the internet.
+        </p>
+      </header>
 
-          <h1 className="text-5xl md:text-6xl font-extrabold text-yellow-400 drop-shadow-lg">
-            projects
-          </h1>
-
-          <p className="mt-5 text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            a collection of software experiments, questionable ideas, and things
-            that somehow survived long enough to make it onto the internet.
-          </p>
-        </motion.div>
-
-        {/* Project grid */}
-        <div className="grid gap-8 md:grid-cols-2">
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.name}
-              className="group relative overflow-hidden rounded-3xl border border-white/10 bg-[#1b2745] p-7 shadow-xl"
-              initial={{ opacity: 0, y: 35 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.1,
-              }}
-              whileHover={{
-                y: -8,
-                rotate: index % 2 === 0 ? -1 : 1,
-              }}
-            >
-              {/* Accent blob */}
-              <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-yellow-400/10 blur-3xl" />
-
-              <div className="relative z-10">
-                <p className="text-sm text-yellow-400 font-semibold mb-2">
-                  {project.subtitle}
-                </p>
-
-                <h2 className="text-3xl font-bold mb-4">{project.name}</h2>
-
-                <p className="text-gray-300 leading-relaxed">
-                  {project.description}
-                </p>
-
-                {/* Under the hood */}
-                <h3 className="mt-6 text-sm font-semibold text-yellow-400">
-                  under the hood
-                </h3>
-                <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-gray-400 leading-relaxed">
-                  {project.underTheHood.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-
-                {/* Tech stack */}
-                <div className="flex flex-wrap gap-2 mt-6">
-                  {project.tech.map((tech) => (
-                    <span
-                      key={tech}
-                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-gray-300"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                {/* little dumb note */}
-                <p className="mt-7 text-sm italic text-gray-500">
-                  {project.note}
-                </p>
-
-                {/* buttons */}
+      {projects.map((project) => (
+        <article key={project.name} className="mt-28 md:mt-40">
+          {/* The name holds still while the screens pass by */}
+          <div className="grid gap-10 px-4 md:grid-cols-12 md:px-8">
+            <div className="md:col-span-5">
+              <div className="md:sticky md:top-28">
+                <p className="text-lead text-ink-soft">{project.subtitle}</p>
+                <h2 className="mt-2 text-head">{project.name}</h2>
+                <p className="mt-6 max-w-[42ch]">{project.description}</p>
+                <p className="mt-4">{project.note}</p>
                 <div className="mt-7 flex flex-wrap gap-3">
-                  <motion.a
+                  <a
                     href={project.live}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-lg bg-yellow-400 px-5 py-3 font-bold text-black hover:bg-yellow-500 transition"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.97 }}
+                    className={`${pill} bg-ink text-paper hover:bg-blue hover:text-paper`}
                   >
                     open project
                     <FaArrowUpRightFromSquare size={14} aria-hidden="true" />
-                  </motion.a>
-
-                  <motion.a
+                  </a>
+                  <a
                     href={project.github}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-5 py-3 font-semibold text-white hover:bg-white/10 transition"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.97 }}
+                    className={`${pill} bg-sun text-ink hover:bg-ink hover:text-paper`}
                   >
                     <FaGithub size={17} aria-hidden="true" />
                     github
-                  </motion.a>
+                  </a>
                 </div>
               </div>
-            </motion.div>
-          ))}
-
-          {/* Placeholder for the next project */}
-          <motion.div
-            className="flex min-h-[360px] items-center justify-center rounded-3xl border border-dashed border-white/15 bg-white/[0.02] p-7"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
-          >
-            <div className="text-center">
-              <p className="text-4xl mb-4">🛠️</p>
-
-              <h2 className="text-2xl font-bold text-gray-300">
-                more questionable ideas soon
-              </h2>
-
-              <p className="mt-3 text-gray-500">
-                unfortunately i have not stopped making things
-              </p>
             </div>
-          </motion.div>
-        </div>
 
-        {/* Bottom */}
-        <motion.div
-          className="mt-16 text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <p className="text-gray-500 text-sm">
-            more projects will appear here as soon as they become presentable
-            enough to admit i made them
-          </p>
-        </motion.div>
-      </div>
+            <ul className="flex flex-col gap-16 md:col-span-7 md:gap-24">
+              {project.screens.map((screen, index) => (
+                <li
+                  key={screen.src}
+                  className="reveal"
+                  style={{ "--i": index } as React.CSSProperties}
+                >
+                  <div className="overflow-hidden rounded-frame">
+                    <Image
+                      src={screen.src}
+                      alt={screen.alt}
+                      width={1280}
+                      height={800}
+                      sizes="(min-width: 768px) 760px, 100vw"
+                      className="aspect-[16/10] w-full object-cover"
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* The details, on a sunflower field */}
+          <section className="mt-24 bg-sun px-4 py-20 md:mt-32 md:px-8 md:py-28">
+            <div className="grid gap-10 md:grid-cols-12">
+              <h3 className="reveal text-head md:col-span-4">under the hood</h3>
+              <div className="md:col-span-8">
+                <ul className="space-y-5 text-lead">
+                  {project.underTheHood.map((item, index) => (
+                    <li
+                      key={item}
+                      className="reveal"
+                      style={{ "--i": index } as React.CSSProperties}
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <ul aria-label="Built with" className="mt-10 flex flex-wrap gap-2">
+                  {project.tech.map((tech) => (
+                    <li
+                      key={tech}
+                      className="rounded-full bg-paper px-4 py-1.5 text-fine font-medium"
+                    >
+                      {tech}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+        </article>
+      ))}
+
+      {/* What's still in the oven */}
+      <section className="relative mt-24 overflow-hidden px-4 md:mt-32 md:px-8">
+        <div className="grid min-h-[60svh] items-center gap-10 lg:grid-cols-12">
+          <div className="reveal lg:col-span-6">
+            <h2 className="text-head">more questionable ideas soon</h2>
+            <p className="mt-6 max-w-md">
+              currently cooking: a social music app that lets people see what
+              others nearby are jamming to. it&#39;s still in the oven, so it
+              doesn&#39;t get its own spot yet.
+            </p>
+            <p className="mt-4 max-w-md">
+              unfortunately i have not stopped making things. more projects will
+              appear here as soon as they become presentable enough to admit i
+              made them.
+            </p>
+          </div>
+
+          {/* A record waiting to be pressed, half out of frame */}
+          <div className="relative h-[50svh] lg:col-span-6 lg:h-[70svh]">
+            <Image
+              src="/vinyl_texture.png"
+              alt="A black vinyl record with a white centre label, spinning"
+              width={720}
+              height={720}
+              className="absolute left-[20%] top-1/2 aspect-square h-full w-auto max-w-none -translate-y-1/2 rounded-full motion-safe:animate-[spin_40s_linear_infinite] lg:left-[30%]"
+            />
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

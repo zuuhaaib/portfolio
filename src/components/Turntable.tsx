@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, useAnimations } from "@react-three/drei";
+import { Center, useGLTF, useAnimations } from "@react-three/drei";
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
@@ -36,7 +36,7 @@ export default function Turntable(props: TurntableProps) {
 
   return (
     <div ref={wrapperRef} className="h-full w-full">
-      <Canvas camera={{ position: [0, 2, 4], fov: 40 }}>
+      <Canvas camera={{ position: [0, 2, 4], fov: 30 }}>
         <ambientLight intensity={1} />
         <directionalLight position={[2, 5, 2]} intensity={1.5} />
         <Suspense fallback={<VinylPlaceholder />}>
@@ -95,8 +95,9 @@ function VinylPlayer({
         nextPlaying ? 2 : 4
       );
       setTimeout(() => {
+        // Playing shows the button; stopping brings the hint back
         setShowButton(nextPlaying);
-        setShowMessage(false);
+        setShowMessage(!nextPlaying);
       }, 500);
     } else {
       setShowButton(false);
@@ -110,7 +111,11 @@ function VinylPlayer({
     }
   }, [actions]);
 
-  return <primitive object={scene} scale={0.02} onClick={handleVinylClick} />;
+  return (
+    <Center>
+      <primitive object={scene} scale={0.028} onClick={handleVinylClick} />
+    </Center>
+  );
 }
 
 export function preloadTurntableModel() {
