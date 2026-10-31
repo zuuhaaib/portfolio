@@ -1,63 +1,106 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { FaVolumeUp, FaVolumeMute } from "react-icons/fa";
-import { useAudio } from "@/context/AudioContext";
+
+type Section = {
+  label: string;
+  href: string;
+  description: string;
+  image: { src: string; alt: string; size: number };
+};
 
 // Display Order
-const NAV_OPTIONS = ["Home", "About Me", "Projects", "brian_rot"];
+const SECTIONS: Section[] = [
+  {
+    label: "Home",
+    href: "/",
+    description:
+      "Well, I feel like it's pretty self-explanatory. But clicking on this will take you back to the homepage (no way!!). I'm just yapping so that there's no dead space here. Maybe I should add a funny image at the bottom.",
+    image: { src: "/bart-simpson.jpg", alt: "Bart Simpson", size: 200 },
+  },
+  {
+    label: "About Me",
+    href: "/about-me",
+    description:
+      "Find out more about me! My background, my journey (emotional) and why I am the way I am (not really). Here's a fun fact - I recently found out that cows have accents depending on where they're born, and they also have best friends and get depressed when separated (I believe everything I see on the internet).",
+    image: { src: "/jake.jpg", alt: "bakin", size: 300 },
+  },
+  {
+    label: "Projects",
+    href: "/projects",
+    description:
+      "Projects I've worked on or am currently working on. Most of the projects have been the result of not sleeping on time, procrastinating, or maybe someone at a party said 'I have an idea for an app' (pls no more of this).",
+    image: { src: "/sadge.jpg", alt: "sadge", size: 280 },
+  },
+  {
+    label: "brian_rot",
+    href: "/brian_rot",
+    description:
+      "this is where i drop my highly curated, absolutely flawless (objective) music and movie recommendations. expect hidden gems, questionable obsessions, and maybe a few guilty pleasures i'll pretend are ironic.",
+    image: { src: "/brian.jpg", alt: "brian", size: 300 },
+  },
+];
 
 // Vinyl Layout Order (for button positions)
 const VINYL_LAYOUT_ORDER = ["About Me", "Home", "brian_rot", "Projects"];
+const WHEEL_ITEMS = VINYL_LAYOUT_ORDER.map(
+  (label) => SECTIONS.find((s) => s.label === label)!
+);
 
-const SECTION_PLACEHOLDERS = {
-  "About Me":
-    "Find out more about me! My background, my journey (emotional) and why I am the way I am (not really). Here's a fun fact - I recently found out that cows have accents depending on where they're born, and they also have best friends and get depressed when separated (I believe everything I see on the internet).",
-  Home: "Well, I feel like it's pretty self-explanatory. But clicking on this will take you back to the homepage (no way!!). I'm just yapping so that there's no dead space here. Maybe I should add a funny image at the bottom.",
-  Projects:
-    "Projects I've worked on or am currently working on. Most of the projects have been the result of not sleeping on time, procrastinating, or maybe someone at a party said 'I have an idea for an app' (pls no more of this).",
-  brian_rot:
-    "this is where i drop my highly curated, absolutely flawless (objective) music and movie recommendations. expect hidden gems, questionable obsessions, and maybe a few guilty pleasures i'll pretend are ironic.",
-};
+const ACTIVE_SCALE = 1.4;
+const IDLE_SCALE = 1.15;
+const EDGE_MARGIN = 24;
+
+type Geometry = { radius: number; centerX: number };
+
+// Lays the wheel out so the whole label orbit fits in the left half of the
+// screen: the disc can be big, but no label ever rotates off-screen.
+function computeGeometry(labels: (HTMLElement | null)[]): Geometry {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const widest = Math.max(80, ...labels.map((el) => el?.offsetWidth ?? 0));
+  const labelHalf = (widest * ACTIVE_SCALE) / 2;
+  const region = width * 0.5;
+  const radius = Math.max(
+    120,
+    Math.min((region - 2 * (labelHalf + EDGE_MARGIN)) / 2, height * 0.38)
+  );
+  return { radius, centerX: EDGE_MARGIN + labelHalf + radius };
+}
 
 export default function VinylClient() {
   const vinylRef = useRef<HTMLDivElement>(null);
-  const navRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const navRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const smoothScrollRef = useRef(0);
+  const activeIndexRef = useRef(0);
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [viewportHeight, setViewportHeight] = useState(0);
-  const [windowWidth, setWindowWidth] = useState(0);
-
-  const { isMuted, toggleMute } = useAudio();
-  const router = useRouter();
+  const [geometry, setGeometry] = useState<Geometry | null>(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      setViewportHeight(window.innerHeight);
-      setWindowWidth(window.innerWidth);
-    };
+    // The wheel only exists at lg+; smaller screens get the plain list
+    const handleResize = () =>
+      setGeometry(
+        window.innerWidth >= 1024 ? computeGeometry(navRefs.current) : null
+      );
 
     handleResize();
-
     window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
+    if (!geometry) return;
     let frameId: number;
 
     const updateRotation = () => {
       smoothScrollRef.current +=
         (window.scrollY - smoothScrollRef.current) * 0.1;
 
-      const maxScroll = document.body.scrollHeight - viewportHeight;
+      const maxScroll = document.body.scrollHeight - window.innerHeight;
 
       const scrollFraction =
         maxScroll > 0 ? Math.min(smoothScrollRef.current / maxScroll, 1) : 0;
@@ -70,54 +113,43 @@ export default function VinylClient() {
 
       const textMultiplier = 0.4;
       const slowedRotation = totalRotation * textMultiplier;
+      const { radius } = geometry;
 
       let closestIndex = 0;
       let closestDistance = Infinity;
+      const positions: { x: number; y: number }[] = [];
 
-      navRefs.current.forEach((navItem, index) => {
-        if (!navItem) return;
-
+      WHEEL_ITEMS.forEach((_, index) => {
         const baseAngle =
-          (index / VINYL_LAYOUT_ORDER.length) * Math.PI * 2 - Math.PI / 2;
-
+          (index / WHEEL_ITEMS.length) * Math.PI * 2 - Math.PI / 2;
         const dynamicAngle = baseAngle + (slowedRotation * Math.PI) / 180;
-
-        const radius =
-          windowWidth < 768
-            ? Math.min(windowWidth, 600) * 0.35
-            : Math.min(windowWidth, 1200) * 0.25;
-
         const x = radius * Math.cos(dynamicAngle);
         const y = radius * Math.sin(dynamicAngle);
+        positions.push({ x, y });
 
         const distanceToRight = Math.abs(x - radius);
-
         if (distanceToRight < closestDistance) {
           closestDistance = distanceToRight;
           closestIndex = index;
         }
-
-        navItem.style.transition =
-          "transform 0.2s ease-out, color 0.2s ease-out, font-weight 0.2s ease-out";
-
-        navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
       });
-
-      setActiveIndex(NAV_OPTIONS.indexOf(VINYL_LAYOUT_ORDER[closestIndex]));
 
       navRefs.current.forEach((navItem, index) => {
         if (!navItem) return;
-
         const isActive = index === closestIndex;
+        const { x, y } = positions[index];
+        const scale = isActive ? ACTIVE_SCALE : IDLE_SCALE;
 
-        const scale =
-          windowWidth < 768 ? (isActive ? 1.5 : 1.2) : isActive ? 1.8 : 1.5;
-
-        navItem.style.transform += ` scale(${scale})`;
-
+        navItem.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`;
         navItem.style.color = isActive ? "#FFD700" : "#6B7A99";
         navItem.style.fontWeight = isActive ? "bold" : "normal";
       });
+
+      const nextActive = SECTIONS.indexOf(WHEEL_ITEMS[closestIndex]);
+      if (nextActive !== activeIndexRef.current) {
+        activeIndexRef.current = nextActive;
+        setActiveIndex(nextActive);
+      }
 
       frameId = requestAnimationFrame(updateRotation);
     };
@@ -127,60 +159,30 @@ export default function VinylClient() {
     return () => {
       cancelAnimationFrame(frameId);
     };
-  }, [viewportHeight, windowWidth]);
+  }, [geometry]);
 
-  const getRoutePath = (option: string): string => {
-    switch (option) {
-      case "Home":
-        return "/";
-      case "brian_rot":
-        return "/brian_rot";
-      case "About Me":
-        return "/about-me";
-      case "Projects":
-        return "/projects";
-      default:
-        return `/${option.toLowerCase().replace(/ /g, "-")}`;
-    }
-  };
+  const discSize = geometry ? geometry.radius * 1.8 : 0;
 
   return (
     <div
-      className="min-h-[300vh] w-full flex flex-col items-center justify-center relative overflow-hidden"
+      className="min-h-screen lg:min-h-[300vh] w-full relative overflow-x-hidden"
       style={{
         background:
           "radial-gradient(circle at 50% 25%, #2b3a55, #1e2a44, #131b33, #0b132b)",
       }}
     >
-      {/* Mute Button */}
-      <button
-        className="
-          absolute top-4 right-4 z-50
-          cursor-pointer
-          rounded-full
-          bg-gray-800
-          p-3
-          text-white
-          shadow-lg
-          transition
-          hover:bg-gray-700
-          hover:scale-110
-        "
-        onClick={toggleMute}
-        aria-label={isMuted ? "Unmute audio" : "Mute audio"}
-      >
-        {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
-      </button>
+      <h1 className="sr-only">explore</h1>
 
       {/* Interaction Hint */}
       <motion.p
         className="
+          hidden lg:block
           fixed bottom-5 left-5 z-40
           rounded-full
           border border-white/10
           bg-black/20
           px-4 py-2
-          text-xs md:text-sm
+          text-sm
           text-gray-400
           backdrop-blur-sm
           pointer-events-none
@@ -192,8 +194,17 @@ export default function VinylClient() {
         scroll around • click something eventually
       </motion.p>
 
-      {/* Vinyl */}
-      <div className="fixed top-1/2 left-[5vw] md:left-[-30vmin] -translate-y-1/2 w-[80vmin] h-[80vmin] md:w-[60vmin] md:h-[60vmin] flex items-center justify-center">
+      {/* Vinyl (desktop) */}
+      <nav
+        aria-label="Sections"
+        className="hidden lg:flex fixed top-1/2 -translate-y-1/2 items-center justify-center"
+        style={{
+          left: geometry ? geometry.centerX - discSize / 2 : 0,
+          width: discSize,
+          height: discSize,
+          visibility: geometry ? "visible" : "hidden",
+        }}
+      >
         <div
           ref={vinylRef}
           className="
@@ -210,13 +221,14 @@ export default function VinylClient() {
           }}
         />
 
-        {VINYL_LAYOUT_ORDER.map((option, index) => (
-          <button
-            key={option}
+        {WHEEL_ITEMS.map((section, index) => (
+          <Link
+            key={section.label}
+            href={section.href}
+            data-wheel-label
             ref={(el) => {
               navRefs.current[index] = el;
             }}
-            onClick={() => router.push(getRoutePath(option))}
             className="
               group
               absolute
@@ -224,10 +236,10 @@ export default function VinylClient() {
               cursor-pointer
               rounded-full
               px-3 py-2
-              text-base md:text-lg
+              text-lg
               font-semibold
               shadow-lg
-              transition-all
+              transition-[transform,color,background-color,box-shadow]
               duration-200
               ease-out
               hover:bg-yellow-400/10
@@ -237,12 +249,14 @@ export default function VinylClient() {
               left: "50%",
               top: "50%",
               transform: "translate(-50%, -50%)",
+              color: "#6B7A99",
             }}
           >
             <span className="flex items-center gap-2 whitespace-nowrap">
-              {option}
+              {section.label}
 
               <span
+                aria-hidden="true"
                 className="
                   text-xs
                   opacity-0
@@ -256,85 +270,76 @@ export default function VinylClient() {
                 ↗
               </span>
             </span>
-          </button>
+          </Link>
         ))}
-      </div>
+      </nav>
 
-      {/* Descriptions */}
-      <div className="absolute top-0 right-[5vw] w-[80vw] md:w-[60vw] lg:w-[50vw] h-[300vh] flex flex-col justify-start items-start pt-[20vh] md:pt-[10vh] px-4 md:px-0">
-        {NAV_OPTIONS.map((option, index) => {
+      {/* Descriptions (desktop) */}
+      <div className="hidden lg:flex absolute top-0 right-[4vw] w-[44vw] h-[300vh] flex-col justify-start items-start pt-[10vh]">
+        {SECTIONS.map((section, index) => {
           const isActive = activeIndex === index;
 
           return (
             <div
-              key={option}
+              key={section.label}
               className={`
                 w-full
-                p-4 md:p-6
+                p-6
                 mb-6
-                transition-opacity
+                transition-[opacity,transform]
                 duration-300
                 ease-in-out
-                transform
-                transition-transform
                 ${isActive ? "opacity-100 scale-105" : "opacity-40 scale-100"}
               `}
             >
-              <h2 className="text-2xl md:text-3xl font-bold text-white">
-                {option}
+              <h2 className="text-3xl font-bold text-white">
+                {section.label}
               </h2>
 
-              <p className="text-base md:text-lg text-gray-300">
-                {
-                  SECTION_PLACEHOLDERS[
-                    option as keyof typeof SECTION_PLACEHOLDERS
-                  ]
-                }
-              </p>
+              <p className="text-lg text-gray-300">{section.description}</p>
 
-              {option === "Home" && (
-                <Image
-                  src="/bart-simpson.jpg"
-                  alt="Bart Simpson"
-                  width={200}
-                  height={200}
-                  className="mt-4 rounded-lg shadow-lg mx-auto"
-                />
-              )}
-
-              {option === "About Me" && (
-                <Image
-                  src="/jake.jpg"
-                  alt="bakin"
-                  width={300}
-                  height={300}
-                  className="mt-4 rounded-lg shadow-lg mx-auto"
-                />
-              )}
-
-              {option === "Projects" && (
-                <Image
-                  src="/sadge.jpg"
-                  alt="sadge"
-                  width={280}
-                  height={280}
-                  className="mt-4 rounded-lg shadow-lg mx-auto"
-                />
-              )}
-
-              {option === "brian_rot" && (
-                <Image
-                  src="/brian.jpg"
-                  alt="brian"
-                  width={300}
-                  height={300}
-                  className="mt-4 rounded-lg shadow-lg mx-auto"
-                />
-              )}
+              <Image
+                src={section.image.src}
+                alt={section.image.alt}
+                width={section.image.size}
+                height={section.image.size}
+                className="mt-4 rounded-lg shadow-lg mx-auto"
+              />
             </div>
           );
         })}
       </div>
+
+      {/* Plain list (mobile / tablet) */}
+      <ul className="lg:hidden flex flex-col gap-6 px-4 pt-24 pb-12">
+        {SECTIONS.map((section) => (
+          <li key={section.label}>
+            <Link
+              href={section.href}
+              className="block rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:bg-white/[0.06]"
+            >
+              <h2 className="flex items-center gap-2 text-2xl font-bold text-yellow-400">
+                {section.label}
+                <span aria-hidden="true" className="text-base">
+                  ↗
+                </span>
+              </h2>
+
+              <p className="mt-2 text-base text-gray-300">
+                {section.description}
+              </p>
+
+              <Image
+                src={section.image.src}
+                alt={section.image.alt}
+                width={section.image.size}
+                height={section.image.size}
+                className="mt-4 rounded-lg shadow-lg mx-auto h-auto w-auto max-h-56"
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

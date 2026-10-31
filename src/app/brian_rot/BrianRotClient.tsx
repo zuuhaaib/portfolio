@@ -1,11 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FaVolumeUp, FaVolumeMute, FaHome } from "react-icons/fa";
-import { useAudio } from "@/context/AudioContext";
 
 const topMovies = [
   {
@@ -62,28 +59,10 @@ const topAlbums = [
 ];
 
 export default function BrianRotClient() {
-  const router = useRouter();
   const [showSecret, setShowSecret] = useState(false);
-  const { isMuted, toggleMute } = useAudio();
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-[#131b33] text-white p-10">
-      {/* Mute Button */}
-      <button
-        className="absolute top-4 right-4 p-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 transition"
-        onClick={toggleMute}
-      >
-        {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
-      </button>
-
-      <motion.button
-        onClick={() => router.push("/")}
-        className="absolute top-4 left-4 p-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-all shadow-lg hover:shadow-2xl"
-        whileHover={{ scale: 1.1 }}
-      >
-        <FaHome size={20} />
-      </motion.button>
-
+    <div className="min-h-screen flex flex-col items-center bg-[#131b33] text-white px-6 pt-24 pb-10 md:px-10">
       <motion.h1
         className="text-5xl font-bold mb-6 text-yellow-400 drop-shadow-lg"
         initial={{ opacity: 0, y: -20 }}

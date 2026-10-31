@@ -1,18 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { useAudio } from "@/context/AudioContext";
-import {
-  FaGithub,
-  FaLinkedin,
-  FaFileAlt,
-  FaVolumeUp,
-  FaVolumeMute,
-} from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaFileAlt } from "react-icons/fa";
 
 // three.js and the model only load on the client, after the text is up
 const Turntable = dynamic(() => import("@/components/Turntable"), {
@@ -31,8 +24,7 @@ const Turntable = dynamic(() => import("@/components/Turntable"), {
 export default function HomeClient() {
   const [showButton, setShowButton] = useState(false);
   const [showMessage, setShowMessage] = useState(true);
-  const { isMuted, toggleMute, playAudio, stopAudio } = useAudio();
-  const router = useRouter();
+  const { playAudio, stopAudio } = useAudio();
 
   // Desktop warms the model up early; phones wait until the canvas is on screen
   useEffect(() => {
@@ -57,14 +49,6 @@ export default function HomeClient() {
           "radial-gradient(circle at 50% 30%, #5c6ea6, #404e78, #2b3656, #1a243a)",
       }}
     >
-      {/* Mute Button */}
-      <button
-        className="absolute top-4 right-4 p-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 transition"
-        onClick={toggleMute}
-      >
-        {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
-      </button>
-
       {/* Left Section: Text & Buttons */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -135,10 +119,10 @@ export default function HomeClient() {
         <motion.div
           className="absolute bottom-8 md:bottom-16 left-1/2 -translate-x-1/2 w-max text-white"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1, scale: [1, 1.2, 1] }}
-          transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.5 }}
+          animate={{ opacity: [0, 1, 0.55, 1, 0.55, 1] }}
+          transition={{ duration: 6, ease: "easeInOut" }}
         >
-          <p className="text-lg text-center animate-bounce">
+          <p className="text-lg text-center">
             Click on the vinyl to explore
           </p>
         </motion.div>
@@ -152,12 +136,12 @@ export default function HomeClient() {
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
         >
-          <button
-            className="px-10 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-lg font-bold rounded-full shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl focus:ring-4 focus:ring-blue-400"
-            onClick={() => router.push("/vinyl")}
+          <Link
+            href="/vinyl"
+            className="inline-block px-10 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-lg font-bold rounded-full shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl"
           >
             Explore
-          </button>
+          </Link>
         </motion.div>
       )}
     </div>

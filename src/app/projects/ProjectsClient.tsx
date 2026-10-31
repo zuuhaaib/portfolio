@@ -1,10 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { FaHome, FaVolumeMute, FaVolumeUp, FaGithub } from "react-icons/fa";
+import { FaGithub } from "react-icons/fa";
 import { FaArrowUpRightFromSquare } from "react-icons/fa6";
-import { useAudio } from "@/context/AudioContext";
 
 const projects = [
   {
@@ -20,31 +18,8 @@ const projects = [
 ];
 
 export default function ProjectsClient() {
-  const router = useRouter();
-  const { isMuted, toggleMute } = useAudio();
-
   return (
     <main className="min-h-screen bg-[#131b33] text-white px-6 py-20">
-      {/* Home button */}
-      <motion.button
-        onClick={() => router.push("/")}
-        className="fixed top-4 left-4 z-20 p-3 bg-yellow-500 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-600 transition-all"
-        whileHover={{ scale: 1.1, rotate: -3 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <FaHome size={20} />
-      </motion.button>
-
-      {/* Mute button */}
-      <motion.button
-        onClick={toggleMute}
-        className="fixed top-4 right-4 z-20 p-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 transition"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
-      </motion.button>
-
       <div className="mx-auto max-w-6xl">
         {/* Header */}
         <motion.div

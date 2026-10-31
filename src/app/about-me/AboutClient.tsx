@@ -1,32 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { FaVolumeUp, FaVolumeMute, FaHome } from "react-icons/fa";
-import { useAudio } from "@/context/AudioContext";
 
 const AboutClient: React.FC = () => {
-  const router = useRouter();
-  const { isMuted, toggleMute } = useAudio();
-
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-white px-6 py-16">
-      {/* Mute Button */}
-      <button
-        className="absolute top-4 right-4 p-3 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-700 transition"
-        onClick={toggleMute}
-      >
-        {isMuted ? <FaVolumeMute size={20} /> : <FaVolumeUp size={20} />}
-      </button>
-
-      <motion.button
-        onClick={() => router.push("/")}
-        className="absolute top-4 left-4 p-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-600 transition-all shadow-lg hover:shadow-2xl"
-        whileHover={{ scale: 1.1 }}
-      >
-        <FaHome size={20} />
-      </motion.button>
-
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a] text-white px-6 pt-24 pb-16">
       {/* Heading */}
       <motion.h1
         className="text-5xl font-extrabold mb-6 text-yellow-400"
@@ -206,13 +185,14 @@ const AboutClient: React.FC = () => {
       </motion.p>
 
       {/* Take Me Back Button */}
-      <motion.button
-        onClick={() => router.push("/")}
-        className="mt-12 px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-500 transition-all"
-        whileHover={{ scale: 1.1 }}
-      >
-        take me back
-      </motion.button>
+      <motion.div className="mt-12" whileHover={{ scale: 1.1 }}>
+        <Link
+          href="/"
+          className="inline-block px-6 py-3 bg-yellow-400 text-black font-bold rounded-lg shadow-lg hover:bg-yellow-500 transition-all"
+        >
+          take me back
+        </Link>
+      </motion.div>
     </div>
   );
 };
