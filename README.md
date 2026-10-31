@@ -2,7 +2,7 @@
 
 my personal site: a clickable 3D turntable on the landing page, a vinyl wheel you scroll to navigate, my projects, an about page, and brian_rot (music and movie takes nobody asked for).
 
-**live:** TODO: add the production URL
+**live:** https://portfolio-zuuhaaibs-projects.vercel.app/
 
 ## stack
 
@@ -39,19 +39,6 @@ optional: set `NEXT_PUBLIC_SITE_URL` (e.g. `https://example.com`) so Open Graph 
 - `src/components/Turntable.tsx` is the 3D turntable, `SpinningRecord.tsx` the floating record on brian_rot, `SiteControls.tsx` the home + mute buttons
 - `src/context/AudioContext.tsx` handles the background music (only loads once you click the turntable)
 - `public/vinyl_player.glb` is the turntable model, optimized with [gltf-transform](https://gltf-transform.dev) (webp textures at 1024px, meshopt)
-
-## credits
-
-- 3D turntable model (`public/vinyl_player.glb`): TODO: author, source link, license
-- vinyl texture (`public/vinyl_texture.png`): TODO: source
-- music (`public/music/`): TODO: track names, artists, and usage rights
-- movie posters, album covers and meme images belong to their respective owners
-- RealTalkTracker screenshots (`public/projects/`) are of my own app
-- photos in `public/about/`, all via Wikimedia Commons (also credited at the bottom of the about page):
-  - [Toronto sunrise skyline, 2014](https://commons.wikimedia.org/w/index.php?curid=57024776) by OldYorkGuy, CC BY-SA 3.0 (resized)
-  - [Peter Witt streetcar on Queen Street in Toronto](https://commons.wikimedia.org/wiki/File:Peter_Witt_streetcar_on_Queen_Street_in_Toronto.jpg) by Robert Taylor, CC BY 2.0
-  - [KeeleCampus2](https://commons.wikimedia.org/w/index.php?curid=19352958) by Raysonho, CC0
-  - [Toronto Davisville Subway Station Postcard](https://commons.wikimedia.org/wiki/File:Toronto_Davisville_Subway_Station_Postcard_(P300544).jpg) by Royal Specialty, public domain
 
 ## design
 

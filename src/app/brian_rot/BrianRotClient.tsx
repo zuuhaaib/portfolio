@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { FaTrophy } from "react-icons/fa";
 
 // The floating record is its own small three.js scene, loaded on demand
 const SpinningRecord = dynamic(() => import("@/components/SpinningRecord"), {
@@ -69,6 +70,17 @@ const topAlbums = [
   },
 ];
 
+// What the [do not click] button says back, by how many times you ignored it
+function secretMessage(clicks: number) {
+  if (clicks >= 25) return "ok at this point you live here.";
+  if (clicks >= 10) return "this is now a you problem.";
+  if (clicks >= 5) return "you've been warned.";
+  return "congrats, you found the secret. your reward? validation.";
+}
+
+const ACHIEVEMENT_AT = 25;
+const ACHIEVEMENT_MS = 5000;
+
 // Posters pinned up slightly crooked, like a bedroom wall
 const TILTS = ["-rotate-3", "rotate-2", "-rotate-1", "rotate-3"];
 
@@ -77,7 +89,19 @@ function albumTitle(album: (typeof topAlbums)[number]) {
 }
 
 export default function BrianRotClient() {
-  const [showSecret, setShowSecret] = useState(false);
+  const [clicks, setClicks] = useState(0);
+  const [achievement, setAchievement] = useState(false);
+
+  useEffect(() => {
+    if (clicks === ACHIEVEMENT_AT) setAchievement(true);
+  }, [clicks]);
+
+  // The popup's own timer, so clicking on past 25 can't keep it up forever
+  useEffect(() => {
+    if (!achievement) return;
+    const timer = setTimeout(() => setAchievement(false), ACHIEVEMENT_MS);
+    return () => clearTimeout(timer);
+  }, [achievement]);
   // The record currently pulled up out of the crate
   const [pulled, setPulled] = useState(0);
 
@@ -227,21 +251,51 @@ export default function BrianRotClient() {
         <h2 className="sr-only">a secret</h2>
         <button
           type="button"
-          onClick={() => setShowSecret(true)}
+          onClick={() => setClicks((count) => count + 1)}
           className="cursor-pointer rounded-full bg-ink px-6 py-3 font-medium text-paper transition hover:-translate-y-0.5 hover:bg-blue hover:text-paper active:translate-y-0"
         >
           [do not click]
         </button>
-        {showSecret && (
-          <motion.p
-            className="text-lead"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            congrats, you found the secret. your reward? validation.
-          </motion.p>
-        )}
+        <div aria-live="polite">
+          {clicks > 0 && (
+            <motion.p
+              key={secretMessage(clicks)}
+              className="text-lead"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              {secretMessage(clicks)}
+            </motion.p>
+          )}
+        </div>
       </section>
+
+      {/* A fake achievement, game-console style */}
+      <div
+        role="status"
+        className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4"
+      >
+        <AnimatePresence>
+          {achievement && (
+            <motion.div
+              className="flex items-center gap-4 rounded-full bg-ink py-3 pl-3 pr-6 text-paper"
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 40 }}
+            >
+              <span className="flex h-11 w-11 items-center justify-center rounded-full bg-sun text-ink">
+                <FaTrophy size={20} aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-fine opacity-80">
+                  achievement unlocked
+                </span>
+                <span className="block font-bold">no impulse control</span>
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </main>
   );
 }

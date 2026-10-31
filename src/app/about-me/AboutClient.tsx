@@ -87,30 +87,6 @@ function TapedPrint({
   );
 }
 
-// The about page's photos, all via Wikimedia Commons
-const credits = [
-  {
-    title: "Toronto sunrise skyline, 2014",
-    href: "https://commons.wikimedia.org/w/index.php?curid=57024776",
-    by: "OldYorkGuy, CC BY-SA 3.0",
-  },
-  {
-    title: "Peter Witt streetcar on Queen Street in Toronto",
-    href: "https://commons.wikimedia.org/wiki/File:Peter_Witt_streetcar_on_Queen_Street_in_Toronto.jpg",
-    by: "Robert Taylor, CC BY 2.0",
-  },
-  {
-    title: "KeeleCampus2",
-    href: "https://commons.wikimedia.org/w/index.php?curid=19352958",
-    by: "Raysonho, CC0",
-  },
-  {
-    title: "Toronto Davisville Subway Station Postcard",
-    href: "https://commons.wikimedia.org/wiki/File:Toronto_Davisville_Subway_Station_Postcard_(P300544).jpg",
-    by: "Royal Specialty, public domain",
-  },
-];
-
 // Quick facts, all lifted from further down this page
 const facts = [
   { label: "based in", value: "toronto, canada" },
@@ -160,12 +136,18 @@ function FactSheet() {
 
 const AboutClient: React.FC = () => {
   return (
-    <main>
+    <main className="pb-24 md:pb-32">
       {/* Heading */}
       <header className="px-4 pt-28 md:px-8 md:pt-36">
         <h1 className="reveal text-[2.6rem] leading-[0.9] md:text-poster">
           hi! i&#39;m zuhaib [he/him]
         </h1>
+        <p
+          className="reveal mt-6 text-lead text-ink-soft"
+          style={{ "--i": 1 } as React.CSSProperties}
+        >
+          reading time: 4 min, or 12 if you look at the pictures
+        </p>
 
         {/* Intro, next to the city it's written from */}
         <div className="mt-12 grid items-end gap-8 md:mt-16 md:grid-cols-12 md:gap-10">
@@ -183,15 +165,15 @@ const AboutClient: React.FC = () => {
           <TapedPrint
             className="md:col-span-7"
             delay={2}
-            src="/about/toronto-sunrise.webp"
-            alt="Toronto's skyline lit gold by the low winter sun, just after sunrise"
+            src="/100th CN tower pic.jpeg"
+            alt="The CN Tower lit pink and blue over the Toronto skyline at night, seen across the water past rows of sailboats"
             width={1600}
-            height={1200}
+            height={1556}
             sizes="(min-width: 768px) 760px, 100vw"
-            aspect="aspect-[4/3]"
+            aspect="aspect-[1600/1556]"
             tilt="rotate-1"
             priority
-            caption="toronto, just after sunrise. home base."
+            caption="my 100th picture of the cn tower. home base."
           />
         </div>
       </header>
@@ -238,15 +220,15 @@ const AboutClient: React.FC = () => {
             nightmares, and a deep appreciation for well-placed semicolons.
           </p>
           <TapedPrint
-            className="py-4"
-            src="/about/york-keele-campus.webp"
-            alt="The York University Keele Campus sign on York Boulevard, with trees and blue sky behind it"
-            width={1920}
-            height={1280}
-            sizes="(min-width: 768px) 700px, 100vw"
-            aspect="aspect-[3/2]"
+            className="max-w-md py-4"
+            src="/uni morning walk.jpeg"
+            alt="A misty pond on an early morning walk, trees and autumn leaves reflected in the still water"
+            width={1200}
+            height={1600}
+            sizes="(min-width: 768px) 448px, 100vw"
+            aspect="aspect-[3/4]"
             tilt="-rotate-2"
-            caption={`york's keele campus, where the semicolons live.`}
+            caption="a morning walk at uni, before the semicolons."
           />
           <p>
             Somewhere along the way, I’ve pulled all-nighters that turned into
@@ -258,19 +240,6 @@ const AboutClient: React.FC = () => {
             I’m starting to find something after all.
           </p>
         </Chapter>
-
-        {/* The city, in a full band */}
-        <TapedPrint
-          className="px-4 md:px-8"
-          src="/about/queen-street-1975.webp"
-          alt="A wooden Peter Witt streetcar rolling down Queen Street in Toronto in 1975"
-          width={1798}
-          height={1128}
-          sizes="100vw"
-          aspect="aspect-[16/9]"
-          tilt="-rotate-1"
-          caption="queen street, toronto, 1975. ultimate goal: walk every street in this city."
-        />
 
         <Chapter title="extracurriculars (aka my attempt to have a social life)">
           <p>
@@ -330,15 +299,15 @@ const AboutClient: React.FC = () => {
             </li>
           </ul>
           <TapedPrint
-            className="pt-6"
-            src="/about/davisville-postcard.webp"
-            alt="A late-1960s postcard of Davisville subway station, with a red train beside a silver one"
-            width={1477}
-            height={933}
-            sizes="(min-width: 768px) 700px, 100vw"
-            aspect="aspect-[1477/933]"
+            className="max-w-md pt-6"
+            src="/interesting looking cone.jpeg"
+            alt="An orange traffic cone with a doodle on it, standing on a sidewalk beside a red construction fence"
+            width={1200}
+            height={1600}
+            sizes="(min-width: 768px) 448px, 100vw"
+            aspect="aspect-[3/4]"
             tilt="rotate-2"
-            caption={`davisville station on a late-'60s postcard. the city before i started walking it.`}
+            caption="an interesting looking cone. one of the perks of walking every street."
           />
         </Chapter>
       </div>
@@ -377,20 +346,6 @@ const AboutClient: React.FC = () => {
           </div>
         </div>
       </section>
-
-      <p className="px-4 py-10 text-fine text-ink-soft md:px-8">
-        Pictures, via Wikimedia Commons:{" "}
-        {credits.map((credit, index) => (
-          <span key={credit.href}>
-            {index > 0 && "; "}
-            <a className="underline" href={credit.href}>
-              “{credit.title}”
-            </a>{" "}
-            by {credit.by}
-          </span>
-        ))}
-        .
-      </p>
     </main>
   );
 };

@@ -15,6 +15,7 @@ interface AudioContextProps {
   toggleMute: () => void;
   playAudio: () => void;
   stopAudio: () => void;
+  nextTrack: () => void;
   volume: number; // To manage volume level
   setVolume: (value: number) => void; // Method to update volume
 }
@@ -34,11 +35,12 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   const isMutedRef = useRef(false);
   // Created on first play, so no song downloads until someone asks for one
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const songIndexRef = useRef(-1);
 
   const getAudio = () => {
     if (!audioRef.current) {
-      const song = songs[Math.floor(Math.random() * songs.length)];
-      const audio = new Audio(song);
+      songIndexRef.current = Math.floor(Math.random() * songs.length);
+      const audio = new Audio(songs[songIndexRef.current]);
       audio.loop = true;
       audio.muted = isMutedRef.current;
       audioRef.current = audio;
@@ -70,6 +72,22 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Skip to a different song and play it (even if nothing was playing yet)
+  const nextTrack = () => {
+    const audio = getAudio();
+    const next =
+      (songIndexRef.current +
+        1 +
+        Math.floor(Math.random() * (songs.length - 1))) %
+      songs.length;
+    songIndexRef.current = next;
+    audio.src = songs[next];
+    audio.volume = volume;
+    audio.play().catch(() => {
+      // Autoplay blocked or file missing; nothing useful to do here
+    });
+  };
+
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
@@ -78,7 +96,15 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AudioContext.Provider
-      value={{ isMuted, toggleMute, playAudio, stopAudio, volume, setVolume }}
+      value={{
+        isMuted,
+        toggleMute,
+        playAudio,
+        stopAudio,
+        nextTrack,
+        volume,
+        setVolume,
+      }}
     >
       {children}
     </AudioContext.Provider>

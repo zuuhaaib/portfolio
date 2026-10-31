@@ -4,6 +4,7 @@ import { AudioProvider } from "@/context/AudioContext";
 import SiteControls from "@/components/SiteControls";
 import Providers from "@/components/Providers";
 import Reveals from "@/components/Reveals";
+import Shenanigans from "@/components/Shenanigans";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
@@ -48,11 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={bricolage.variable}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={bricolage.variable} suppressHydrationWarning>
       <head>
         {/* Lets entrance animations hide content only when script runs */}
         <script
@@ -67,6 +64,7 @@ export default function RootLayout({
             <SiteControls />
             {children}
             <Reveals />
+            <Shenanigans />
             <Analytics />
           </AudioProvider>
         </Providers>

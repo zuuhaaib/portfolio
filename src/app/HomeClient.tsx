@@ -24,7 +24,11 @@ const Turntable = dynamic(() => import("@/components/Turntable"), {
 
 // What's on the turntable lately (same picks as brian_rot)
 const inRotation = [
-  { title: "The Glow Pt. 2", artist: "The Microphones", image: "/the-glow.jpg" },
+  {
+    title: "The Glow Pt. 2",
+    artist: "The Microphones",
+    image: "/the-glow.jpg",
+  },
   { title: "Spiderland", artist: "Slint", image: "/spiderland.jpg" },
   {
     title: "The Black Saint and the Sinner Lady",
@@ -32,12 +36,6 @@ const inRotation = [
     image: "/mingus.jpg",
   },
   { title: "98.12.28", artist: "Fishmans", image: "/fishmans.jpg" },
-];
-
-const navLinks = [
-  { href: "/projects", label: "projects" },
-  { href: "/about-me", label: "about" },
-  { href: "/brian_rot", label: "brian_rot" },
 ];
 
 const pill =
@@ -105,25 +103,14 @@ export default function HomeClient() {
           cs student and full stack developer, based in toronto.
         </p>
 
-        {/* Setlist + the one action, top right on desktop */}
-        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 md:absolute md:right-24 md:top-5 md:mt-0">
-          <nav aria-label="Site" className="flex gap-5 text-lead">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="underline decoration-ink/30 decoration-2 underline-offset-4 transition-colors hover:decoration-ink"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2">
+        {/* Press kit and socials, top right on desktop */}
+        <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 md:absolute md:right-40 md:top-5 md:mt-0">
+          <div className="flex flex-wrap items-center gap-2">
             <a
-              href="https://drive.google.com/file/d/1B6igxFHeufDJhX3aoolAaruAaG8cjqcJ/view?usp=sharing"
+              href="https://drive.google.com/file/d/1EZwZKSlIvqwtlP_20T_S3gIgIIKqbGmf/view?usp=sharing"
               target="_blank"
               rel="noopener noreferrer"
-              className={pill}
+              className={`${pill} whitespace-nowrap`}
             >
               resume
             </a>
@@ -186,8 +173,8 @@ export default function HomeClient() {
           <div className="reveal md:col-span-5">
             <h2 className="text-head">latest release</h2>
             <p className="mt-5 text-lead">
-              RealTalkTracker: feed it a WhatsApp or Instagram chat and find
-              out who&#39;s actually carrying the conversation.
+              RealTalkTracker: feed it a WhatsApp or Instagram chat and find out
+              who&#39;s actually carrying the conversation.
             </p>
             <Link href="/projects" className={`${pill} mt-7`}>
               see the project
