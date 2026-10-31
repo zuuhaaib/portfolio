@@ -23,7 +23,7 @@ const AboutClient: React.FC = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.7 }}
       >
-        22 years old, currently stationed in Toronto, Canada, and on a lifelong
+        Currently stationed in Toronto, Canada, and on a lifelong
         quest to make cool things, break (and sometimes fix) software, and
         overanalyze the world around me. This page is a loosely structured,
         slightly unhinged collection of things I do and care about. Read at your
@@ -47,13 +47,19 @@ const AboutClient: React.FC = () => {
             Years later, I still haven’t stopped.
           </p>
           <p className="mt-2">
-            My latest and greatest? A <strong>social music app</strong> that
-            lets people see what others nearby are jamming to (like a concert,
-            but without the ticket price). Also working on{" "}
-            <strong>TalkTracker</strong>, which analyzes chat data for deep,
-            possibly concerning insights into your digital conversations. If
-            you’ve ever wanted an AI therapist for your group chats, good news!
-            I’ve got you covered.
+            Currently cooking: a <strong>social music app</strong> that lets
+            people see what others nearby are jamming to (like a concert, but
+            without the ticket price). It&#39;s not on the projects page yet
+            because it&#39;s still in the oven. What is there:{" "}
+            <Link
+              href="/projects"
+              className="text-yellow-400 hover:underline font-semibold"
+            >
+              RealTalkTracker
+            </Link>
+            , which analyzes chat data for deep, possibly concerning insights
+            into your digital conversations. If you’ve ever wanted an AI
+            therapist for your group chats, good news! I’ve got you covered.
           </p>
         </motion.section>
         <motion.section
@@ -68,8 +74,8 @@ const AboutClient: React.FC = () => {
           <p className="mb-4">
             I’m currently navigating the academic jungle at{" "}
             <strong>York University</strong> in Toronto, where I’m pursuing a{" "}
-            <strong>Bachelor of Science in Computer Science</strong> with an
-            expected graduation in 2026. They say university is all about
+            <strong>Bachelor of Science in Computer Science</strong>,
+            graduating in 2026. They say university is all about
             finding yourself, but so far, all I’ve found is an overwhelming pile
             of programming assignments, an ever-growing list of debugging
             nightmares, and a deep appreciation for well-placed semicolons.

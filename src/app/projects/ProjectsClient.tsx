@@ -9,8 +9,14 @@ const projects = [
     name: "RealTalkTracker",
     subtitle: "chat analysis thingymahjig",
     description:
-      "feed it an exported WhatsApp chat(jopefully more supported platforms coming soon) and it’ll tell you who talks the most, who takes forever to reply, who keeps double texting, and what an AI thinks your friendship actually looks like.",
-    tech: ["Next.js", "FastAPI", "Python", "OpenAI", "Recharts"],
+      "feed it an exported WhatsApp chat or a copied Instagram conversation and it’ll tell you who talks the most, who takes forever to reply, who keeps double texting, and what an AI thinks your friendship actually looks like.",
+    underTheHood: [
+      "the whatsapp parser figures out the date format (dd/mm vs mm/dd) once per file instead of guessing line by line",
+      "the ai gets contiguous excerpts from across the whole chat, and its response has to pass strict structured-output validation before you see it",
+      "one shared daily ai quota enforced by an atomic redis lua script, plus rate and concurrency limits so nobody melts the server",
+      "ci runs the backend tests and the frontend lint + build on every push to main and every pr",
+    ],
+    tech: ["Next.js", "FastAPI", "Python", "OpenAI", "Redis", "Recharts"],
     live: "https://real-talk-tracker.vercel.app",
     github: "https://github.com/zuuhaaib/RealTalkTracker",
     note: "therapy was apparently too expensive",
@@ -72,6 +78,16 @@ export default function ProjectsClient() {
                 <p className="text-gray-300 leading-relaxed">
                   {project.description}
                 </p>
+
+                {/* Under the hood */}
+                <h3 className="mt-6 text-sm font-semibold text-yellow-400">
+                  under the hood
+                </h3>
+                <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-gray-400 leading-relaxed">
+                  {project.underTheHood.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
 
                 {/* Tech stack */}
                 <div className="flex flex-wrap gap-2 mt-6">
