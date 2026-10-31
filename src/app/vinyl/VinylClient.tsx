@@ -19,28 +19,44 @@ const SECTIONS: Section[] = [
     href: "/",
     description:
       "Well, I feel like it's pretty self-explanatory. But clicking on this will take you back to the homepage (no way!!). I'm just yapping so that there's no dead space here. Maybe I should add a funny image at the bottom.",
-    image: { src: "/bart-simpson.jpg", alt: "Bart Simpson", size: 200 },
+    image: {
+      src: "/bart-simpson.jpg",
+      alt: "Bart Simpson standing there, unsure why he clicked this",
+      size: 200,
+    },
   },
   {
     label: "About Me",
     href: "/about-me",
     description:
       "Find out more about me! My background, my journey (emotional) and why I am the way I am (not really). Here's a fun fact - I recently found out that cows have accents depending on where they're born, and they also have best friends and get depressed when separated (I believe everything I see on the internet).",
-    image: { src: "/jake.jpg", alt: "bakin", size: 300 },
+    image: {
+      src: "/jake.jpg",
+      alt: "Jake Gyllenhaal doing an unsettlingly wide smile",
+      size: 300,
+    },
   },
   {
     label: "Projects",
     href: "/projects",
     description:
       "Projects I've worked on or am currently working on. Most of the projects have been the result of not sleeping on time, procrastinating, or maybe someone at a party said 'I have an idea for an app' (pls no more of this).",
-    image: { src: "/sadge.jpg", alt: "sadge", size: 280 },
+    image: {
+      src: "/sadge.jpg",
+      alt: "Exhausted cartoon dad in headphones slumped at his computer",
+      size: 280,
+    },
   },
   {
     label: "brian_rot",
     href: "/brian_rot",
     description:
       "this is where i drop my highly curated, absolutely flawless (objective) music and movie recommendations. expect hidden gems, questionable obsessions, and maybe a few guilty pleasures i'll pretend are ironic.",
-    image: { src: "/brian.jpg", alt: "brian", size: 300 },
+    image: {
+      src: "/brian.jpg",
+      alt: "\"Brain: organ that controls the nervous system\" with an arrow pointing at Brian from Family Guy",
+      size: 300,
+    },
   },
 ];
 
@@ -95,10 +111,17 @@ export default function VinylClient() {
   useEffect(() => {
     if (!geometry) return;
     let frameId: number;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
     const updateRotation = () => {
-      smoothScrollRef.current +=
-        (window.scrollY - smoothScrollRef.current) * 0.1;
+      if (reduceMotion) {
+        smoothScrollRef.current = window.scrollY;
+      } else {
+        smoothScrollRef.current +=
+          (window.scrollY - smoothScrollRef.current) * 0.1;
+      }
 
       const maxScroll = document.body.scrollHeight - window.innerHeight;
 
@@ -107,7 +130,7 @@ export default function VinylClient() {
 
       const totalRotation = scrollFraction * 720;
 
-      if (vinylRef.current) {
+      if (vinylRef.current && !reduceMotion) {
         vinylRef.current.style.transform = `rotate(${totalRotation}deg)`;
       }
 
@@ -151,8 +174,17 @@ export default function VinylClient() {
         setActiveIndex(nextActive);
       }
 
-      frameId = requestAnimationFrame(updateRotation);
+      if (!reduceMotion) {
+        frameId = requestAnimationFrame(updateRotation);
+      }
     };
+
+    if (reduceMotion) {
+      // Only update when the user actually scrolls
+      updateRotation();
+      window.addEventListener("scroll", updateRotation, { passive: true });
+      return () => window.removeEventListener("scroll", updateRotation);
+    }
 
     frameId = requestAnimationFrame(updateRotation);
 
@@ -212,9 +244,9 @@ export default function VinylClient() {
             rounded-full
             bg-cover bg-center
             shadow-2xl
-            transition-transform
-            duration-300
-            ease-out
+            motion-safe:transition-transform
+            motion-safe:duration-300
+            motion-safe:ease-out
           "
           style={{
             backgroundImage: "url('/vinyl_texture.png')",
@@ -239,7 +271,7 @@ export default function VinylClient() {
               text-lg
               font-semibold
               shadow-lg
-              transition-[transform,color,background-color,box-shadow]
+              motion-safe:transition-[transform,color,background-color,box-shadow]
               duration-200
               ease-out
               hover:bg-yellow-400/10

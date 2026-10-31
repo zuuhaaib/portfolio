@@ -7,24 +7,28 @@ import { motion } from "framer-motion";
 const topMovies = [
   {
     title: "Go",
+    year: 1999,
     director: "Doug Liman",
     image: "/go.jpg",
     link: "https://letterboxd.com/film/go/",
   },
   {
     title: "The Holdovers",
+    year: 2023,
     director: "Alexander Payne",
     image: "/holdovers.jpg",
     link: "https://letterboxd.com/film/the-holdovers/",
   },
   {
     title: "Memories of Murder",
+    year: 2003,
     director: "Bong Joon Ho",
     image: "/bong.jpg",
     link: "https://letterboxd.com/film/memories-of-murder/",
   },
   {
     title: "La La Land",
+    year: 2016,
     director: "Damien Chazelle",
     image: "/gosling.jpg",
     link: "https://letterboxd.com/film/la-la-land/",
@@ -46,6 +50,7 @@ const topAlbums = [
   },
   {
     title: "TBSATSL",
+    fullTitle: "The Black Saint and the Sinner Lady",
     artist: "Charles Mingus",
     image: "/mingus.jpg",
     link: "https://open.spotify.com/album/6Sts4Yh7KsDFwq2yTWrGGV?si=uYn9Fj_jRZeDB8jG4rw_jA",
@@ -89,12 +94,13 @@ export default function BrianRotClient() {
             key={movie.title}
             href={movie.link}
             target="_blank"
+            rel="noopener noreferrer"
             className="text-center cursor-pointer transform transition-transform hover:scale-105"
             whileHover={{ scale: 1.1 }}
           >
             <Image
               src={movie.image}
-              alt={movie.title}
+              alt={`Poster for ${movie.title} (${movie.year})`}
               width={160}
               height={240}
               className="rounded-lg shadow-lg hover:shadow-2xl transition-all"
@@ -113,12 +119,15 @@ export default function BrianRotClient() {
             key={album.title}
             href={album.link}
             target="_blank"
+            rel="noopener noreferrer"
             className="text-center cursor-pointer transform transition-transform hover:scale-105"
             whileHover={{ scale: 1.1 }}
           >
             <Image
               src={album.image}
-              alt={album.title}
+              alt={`Cover of ${
+                "fullTitle" in album ? album.fullTitle : album.title
+              } by ${album.artist}`}
               width={160}
               height={160}
               className="rounded-lg shadow-lg hover:shadow-2xl transition-all"

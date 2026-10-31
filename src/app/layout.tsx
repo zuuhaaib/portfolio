@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AudioProvider } from "@/context/AudioContext";
 import SiteControls from "@/components/SiteControls";
+import Providers from "@/components/Providers";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
@@ -55,11 +56,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AudioProvider>
-          <SiteControls />
-          {children}
-          <Analytics />
-        </AudioProvider>
+        <Providers>
+          <AudioProvider>
+            <SiteControls />
+            {children}
+            <Analytics />
+          </AudioProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -19,6 +19,16 @@
   }
 }
 
+/* One visible focus style for every custom link and button */
+@layer base {
+  a:focus-visible,
+  button:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid #facc15;
+    outline-offset: 3px;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

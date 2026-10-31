@@ -101,7 +101,7 @@ export default function ProjectsClient() {
                     whileTap={{ scale: 0.97 }}
                   >
                     open project
-                    <FaArrowUpRightFromSquare size={14} />
+                    <FaArrowUpRightFromSquare size={14} aria-hidden="true" />
                   </motion.a>
 
                   <motion.a
@@ -112,7 +112,7 @@ export default function ProjectsClient() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <FaGithub size={17} />
+                    <FaGithub size={17} aria-hidden="true" />
                     github
                   </motion.a>
                 </div>

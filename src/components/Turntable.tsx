@@ -50,9 +50,12 @@ export default function Turntable(props: TurntableProps) {
 // cheap spinning record shown while the real model downloads
 function VinylPlaceholder() {
   const ref = useRef<THREE.Mesh>(null);
+  const [reduceMotion] = useState(
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 
   useFrame((_, delta) => {
-    if (ref.current) ref.current.rotation.y += delta * 1.5;
+    if (ref.current && !reduceMotion) ref.current.rotation.y += delta * 1.5;
   });
 
   return (

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useAudio } from "@/context/AudioContext";
 import { FaGithub, FaLinkedin, FaFileAlt } from "react-icons/fa";
 
@@ -25,6 +25,7 @@ export default function HomeClient() {
   const [showButton, setShowButton] = useState(false);
   const [showMessage, setShowMessage] = useState(true);
   const { playAudio, stopAudio } = useAudio();
+  const reduceMotion = useReducedMotion();
 
   // Desktop warms the model up early; phones wait until the canvas is on screen
   useEffect(() => {
@@ -65,23 +66,28 @@ export default function HomeClient() {
           <a
             href="https://drive.google.com/file/d/1B6igxFHeufDJhX3aoolAaruAaG8cjqcJ/view?usp=sharing"
             target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center px-6 py-2 bg-white text-black rounded-lg font-semibold shadow-lg hover:scale-105 transition"
           >
-            <FaFileAlt className="mr-2" /> Resume
+            <FaFileAlt className="mr-2" aria-hidden="true" /> Resume
           </a>
           <a
             href="https://github.com/zuuhaaib"
             target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
             className="p-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
           >
-            <FaGithub size={20} />
+            <FaGithub size={20} aria-hidden="true" />
           </a>
           <a
             href="https://www.linkedin.com/in/zuhaib-khan-3a92a4279/"
             target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
             className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            <FaLinkedin size={20} />
+            <FaLinkedin size={20} aria-hidden="true" />
           </a>
         </div>
 
@@ -119,8 +125,10 @@ export default function HomeClient() {
         <motion.div
           className="absolute bottom-8 md:bottom-16 left-1/2 -translate-x-1/2 w-max text-white"
           initial={{ opacity: 0 }}
-          animate={{ opacity: [0, 1, 0.55, 1, 0.55, 1] }}
-          transition={{ duration: 6, ease: "easeInOut" }}
+          animate={{
+            opacity: reduceMotion ? 1 : [0, 1, 0.55, 1, 0.55, 1],
+          }}
+          transition={{ duration: reduceMotion ? 0.3 : 6, ease: "easeInOut" }}
         >
           <p className="text-lg text-center">
             Click on the vinyl to explore
