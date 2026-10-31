@@ -79,11 +79,37 @@
   transform: none;
 }
 
+/* The review dialog: a sheet of paper laid over a dimmed page */
+.review-dialog::backdrop {
+  background: rgb(22 22 22 / 0.65);
+}
+
+.review-dialog[open] {
+  animation: review-in 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Notebook ruling: a faint blue line every 32px */
+.ruled-page {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='32'%3E%3Cline x1='0' y1='31.5' x2='8' y2='31.5' stroke='%232d4fa0' stroke-opacity='0.28'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+@keyframes review-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
 /* With reduced motion nothing waits to be revealed */
 @media (prefers-reduced-motion: reduce) {
   .js .reveal {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .review-dialog[open] {
+    animation: none;
   }
 }

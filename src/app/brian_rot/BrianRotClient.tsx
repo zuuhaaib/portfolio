@@ -5,70 +5,21 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import { FaTrophy } from "react-icons/fa";
+import FilmPoster from "@/components/FilmPoster";
+import ReviewDialog from "@/components/ReviewDialog";
+import {
+  favoriteFilmIds,
+  filmDetails,
+  films,
+  type Film,
+  type FilmId,
+} from "@/data/films";
+import { albums } from "@/data/albums";
 
 // The floating record is its own small three.js scene, loaded on demand
 const SpinningRecord = dynamic(() => import("@/components/SpinningRecord"), {
   ssr: false,
 });
-
-const topMovies = [
-  {
-    title: "Go",
-    year: 1999,
-    director: "Doug Liman",
-    image: "/go.jpg",
-    link: "https://letterboxd.com/film/go/",
-  },
-  {
-    title: "The Holdovers",
-    year: 2023,
-    director: "Alexander Payne",
-    image: "/holdovers.jpg",
-    link: "https://letterboxd.com/film/the-holdovers/",
-  },
-  {
-    title: "Memories of Murder",
-    year: 2003,
-    director: "Bong Joon Ho",
-    image: "/bong.jpg",
-    link: "https://letterboxd.com/film/memories-of-murder/",
-  },
-  {
-    title: "La La Land",
-    year: 2016,
-    director: "Damien Chazelle",
-    image: "/gosling.jpg",
-    link: "https://letterboxd.com/film/la-la-land/",
-  },
-];
-
-const topAlbums = [
-  {
-    title: "The Glow Pt. 2",
-    artist: "The Microphones",
-    image: "/the-glow.jpg",
-    link: "https://open.spotify.com/album/6QYoRO2sXThCORAifrP4Bl?si=kicKqtHbQWCXr9q-hCvJcg",
-  },
-  {
-    title: "Spiderland",
-    artist: "Slint",
-    image: "/spiderland.jpg",
-    link: "https://open.spotify.com/album/2NnkLRaeX33d1Mn8ZLgTo8?si=LGSQMwlgQ8aCdzr1yX5r2Q",
-  },
-  {
-    title: "TBSATSL",
-    fullTitle: "The Black Saint and the Sinner Lady",
-    artist: "Charles Mingus",
-    image: "/mingus.jpg",
-    link: "https://open.spotify.com/album/6Sts4Yh7KsDFwq2yTWrGGV?si=uYn9Fj_jRZeDB8jG4rw_jA",
-  },
-  {
-    title: "98.12.28",
-    artist: "Fishmans",
-    image: "/fishmans.jpg",
-    link: "https://open.spotify.com/album/5K4YFkTizFoMOyN5Khfp7G?si=-4x_M0kJSPa0z2N0jujcVQ",
-  },
-];
 
 // What the [do not click] button says back, by how many times you ignored it
 function secretMessage(clicks: number) {
@@ -84,13 +35,52 @@ const ACHIEVEMENT_MS = 5000;
 // Posters pinned up slightly crooked, like a bedroom wall
 const TILTS = ["-rotate-3", "rotate-2", "-rotate-1", "rotate-3"];
 
-function albumTitle(album: (typeof topAlbums)[number]) {
-  return ("fullTitle" in album && album.fullTitle) || album.title;
+// The reviews shown on the page itself, in reading order
+const STAYED_WITH_ME: readonly FilmId[] = [
+  "paris-texas",
+  "swing-girls",
+  "it-follows",
+  "solaris",
+  "stand-by-me",
+];
+
+// The perforated edge of a strip of film, running the strip's full height
+function SprocketRail({ side }: { side: "left" | "right" }) {
+  const id = `sprockets-${side}`;
+  return (
+    <svg
+      aria-hidden="true"
+      className={`absolute inset-y-0 h-full w-8 ${
+        side === "left" ? "left-1 md:left-2" : "right-1 md:right-2"
+      }`}
+    >
+      <defs>
+        <pattern id={id} width="32" height="28" patternUnits="userSpaceOnUse">
+          <rect x="9" y="8" width="14" height="12" rx="3" fill="#ebecea" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill={`url(#${id})`} />
+    </svg>
+  );
+}
+
+// The small print under a film: year, director, rating, when
+function FilmMeta({ film, className = "" }: { film: Film; className?: string }) {
+  return (
+    <p className={`text-fine ${className}`}>{filmDetails(film)}</p>
+  );
 }
 
 export default function BrianRotClient() {
   const [clicks, setClicks] = useState(0);
   const [achievement, setAchievement] = useState(false);
+  // Which review is open, and the button to hand focus back to afterwards
+  const [openFilmId, setOpenFilmId] = useState<FilmId | null>(null);
+  const [reviewTrigger, setReviewTrigger] = useState<HTMLElement | null>(null);
+  // The crate: every record starts in its sleeve. Hover/focus slides one out
+  // for a look; clicking picks it, and only the pick drives the details below
+  const [selectedAlbum, setSelectedAlbum] = useState<number | null>(null);
+  const [previewAlbum, setPreviewAlbum] = useState<number | null>(null);
 
   useEffect(() => {
     if (clicks === ACHIEVEMENT_AT) setAchievement(true);
@@ -102,8 +92,13 @@ export default function BrianRotClient() {
     const timer = setTimeout(() => setAchievement(false), ACHIEVEMENT_MS);
     return () => clearTimeout(timer);
   }, [achievement]);
-  // The record currently pulled up out of the crate
-  const [pulled, setPulled] = useState(0);
+
+  const openReview = (id: FilmId, trigger: HTMLElement) => {
+    setReviewTrigger(trigger);
+    setOpenFilmId(id);
+  };
+
+  const album = selectedAlbum === null ? null : albums[selectedAlbum];
 
   return (
     <main className="pb-24 md:pb-32">
@@ -139,111 +134,212 @@ export default function BrianRotClient() {
         </div>
       </header>
 
-      {/* Top 4 Movies, pinned to the wall */}
+      {/* Top 4 Movies, pinned to the wall; each one opens its review */}
       <section className="mt-24 bg-blue px-4 py-20 text-paper md:mt-32 md:px-8 md:py-28">
         <h2 className="reveal text-head">top 4 movies</h2>
         <ul className="mt-14 grid grid-cols-2 gap-x-5 gap-y-12 md:grid-cols-4 md:gap-x-10">
-          {topMovies.map((movie, index) => (
-            <li
-              key={movie.title}
-              className="reveal"
-              style={{ "--i": index } as React.CSSProperties}
-            >
-              <a
-                href={movie.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`group block bg-paper p-2.5 pb-4 text-ink transition-transform duration-300 ease-out hover:-translate-y-2 hover:rotate-0 motion-reduce:transition-none md:p-3 md:pb-5 ${TILTS[index]}`}
+          {favoriteFilmIds.map((id, index) => {
+            const film = films[id];
+            return (
+              <li
+                key={id}
+                className="reveal"
+                style={{ "--i": index } as React.CSSProperties}
               >
-                <div className="overflow-hidden">
-                  <Image
-                    src={movie.image}
-                    alt={`Poster for ${movie.title} (${movie.year})`}
-                    width={320}
-                    height={480}
-                    className="aspect-[2/3] w-full object-cover"
+                <button
+                  type="button"
+                  aria-haspopup="dialog"
+                  onClick={(event) => openReview(id, event.currentTarget)}
+                  className={`group block w-full cursor-pointer bg-paper p-2.5 pb-4 text-left text-ink transition-transform duration-300 ease-out hover:-translate-y-2 hover:rotate-0 focus-visible:rotate-0 motion-reduce:transition-none md:p-3 md:pb-5 ${TILTS[index]}`}
+                >
+                  <FilmPoster
+                    film={film}
+                    sizes="(min-width: 768px) 320px, 45vw"
+                    decorative
                   />
-                </div>
-                <p className="mt-3 text-lead font-bold leading-tight tracking-[-0.03em]">
-                  {movie.title}
-                </p>
-                <p className="mt-1 text-fine text-ink-soft">
-                  {movie.director}, {movie.year} · letterboxd ↗
-                </p>
-              </a>
-            </li>
-          ))}
+                  <span className="mt-3 block text-lead font-bold leading-tight tracking-[-0.03em]">
+                    {film.title}
+                  </span>
+                  <span className="mt-1 block text-fine text-ink-soft">
+                    {film.director}, {film.year}
+                  </span>
+                  <span className="mt-3 inline-block text-fine font-medium underline decoration-ink/30 decoration-2 underline-offset-4 group-hover:decoration-ink">
+                    read note ↗
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
+      </section>
+
+      {/* A few reviews, each one a frame on a strip of film */}
+      <section
+        aria-labelledby="stayed-with-me"
+        className="mt-24 px-4 md:mt-32 md:px-8"
+      >
+        <h2 id="stayed-with-me" className="reveal max-w-[16ch] text-head">
+          a few things that stayed with me
+        </h2>
+
+        <div className="relative mt-12 bg-ink px-11 py-10 md:mt-16 md:px-14 md:py-12">
+          <SprocketRail side="left" />
+          <SprocketRail side="right" />
+          <div className="space-y-6 md:space-y-8">
+            {STAYED_WITH_ME.map((id) => {
+              const film = films[id];
+              // Reviews with spoilers show only what comes before them here
+              const shown = film.spoilers
+                ? film.review.slice(0, film.spoilers.from)
+                : film.review;
+              return (
+                <article
+                  key={id}
+                  className="reveal grid gap-4 bg-paper p-6 text-ink md:grid-cols-12 md:gap-x-10 md:p-10"
+                >
+                  <div className="md:col-span-4">
+                    <h3 className="text-lead font-bold leading-tight tracking-[-0.03em] md:text-[2rem]">
+                      {film.title}
+                    </h3>
+                    <FilmMeta film={film} className="mt-2" />
+                  </div>
+                  <div className="max-w-[52ch] space-y-4 text-lead md:col-span-8">
+                    {shown.map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
+                    {film.spoilers && (
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 pt-2 text-body">
+                        <p>{film.spoilers.note}</p>
+                        <button
+                          type="button"
+                          aria-haspopup="dialog"
+                          onClick={(event) => openReview(id, event.currentTarget)}
+                          className="cursor-pointer rounded-full bg-ink px-5 py-2.5 font-medium text-paper transition hover:-translate-y-0.5 hover:bg-blue active:translate-y-0"
+                        >
+                          read the rest
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
       </section>
 
       {/* Top Albums, flipped through like a crate */}
       <section className="mt-24 px-4 md:mt-32 md:px-8">
         <h2 className="reveal text-head">top 4 albums</h2>
         <p className="reveal mt-4 max-w-md">
-          dig through the crate. hover one to pull it out, click to listen.
+          dig through the crate. hover a sleeve to peek, click or tap one to
+          pull it out.
         </p>
 
         <ul className="mt-16 grid grid-cols-2 gap-x-5 gap-y-24 md:flex md:justify-center md:gap-0 md:pt-24 md:[perspective:1600px]">
-          {topAlbums.map((album, index) => {
-            const isPulled = pulled === index;
+          {albums.map((item, index) => {
+            const isLifted = previewAlbum === index;
+            const isSelected = selectedAlbum === index;
             return (
               <li
-                key={album.title}
+                key={item.id}
                 className={`relative md:-ml-[3.5vw] md:first:ml-0 ${
-                  isPulled ? "md:z-20" : "md:z-10"
+                  isLifted ? "md:z-30" : isSelected ? "md:z-20" : "md:z-10"
                 }`}
               >
-                <a
-                  href={album.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`${albumTitle(album)} by ${album.artist}, on spotify`}
-                  onMouseEnter={() => setPulled(index)}
-                  onFocus={() => setPulled(index)}
-                  className={`block transition-transform duration-500 ease-out motion-reduce:transition-none md:w-[clamp(200px,22vw,340px)] ${
-                    isPulled
+                <button
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => setSelectedAlbum(index)}
+                  onMouseEnter={() => setPreviewAlbum(index)}
+                  onMouseLeave={() => setPreviewAlbum(null)}
+                  onFocus={() => setPreviewAlbum(index)}
+                  onBlur={() => setPreviewAlbum(null)}
+                  className={`block w-full cursor-pointer text-left transition-transform duration-500 ease-out motion-reduce:transition-none md:w-[clamp(200px,22vw,340px)] ${
+                    isLifted
                       ? "md:[transform:translateY(-14px)_scale(1.06)]"
-                      : "md:[transform:rotateY(40deg)]"
+                      : isSelected
+                        ? "md:[transform:rotateY(0deg)]"
+                        : "md:[transform:rotateY(40deg)]"
                   }`}
                 >
-                  <div className="relative">
+                  <span className="relative block">
                     {/* The record, sliding up out of its sleeve */}
                     <span
                       aria-hidden="true"
                       className={`absolute inset-x-[4%] top-0 aspect-square rounded-full bg-cover bg-center transition-transform duration-500 ease-out motion-reduce:transition-none ${
-                        isPulled
+                        isLifted
                           ? "-translate-y-[16%] md:-translate-y-[42%] md:rotate-45"
-                          : "-translate-y-[16%] md:translate-y-0"
+                          : "translate-y-0"
                       }`}
                       style={{ backgroundImage: "url('/vinyl_texture.png')" }}
                     />
                     <Image
-                      src={album.image}
-                      alt={`Cover of ${albumTitle(album)} by ${album.artist}`}
+                      src={item.cover}
+                      alt={`Cover of ${item.title} by ${item.artist}`}
                       width={320}
                       height={320}
                       className="relative aspect-square w-full object-cover"
                     />
-                  </div>
-                  <p className="mt-4 text-lead font-bold leading-tight tracking-[-0.03em] md:hidden">
-                    {album.title}
-                  </p>
-                  <p className="text-ink-soft md:hidden">{album.artist}</p>
-                </a>
+                  </span>
+                  <span className="mt-4 block text-lead font-bold leading-tight tracking-[-0.03em] md:hidden">
+                    {item.title}
+                  </span>
+                  <span className="block text-ink-soft md:hidden">
+                    {item.artist}
+                  </span>
+                </button>
               </li>
             );
           })}
         </ul>
 
-        {/* What's in your hands right now (desktop) */}
-        <p
+        {/* What's in your hands: only changes when you pick another record */}
+        <div
           aria-live="polite"
-          className="mt-14 hidden text-center text-lead md:block"
+          className="mx-auto mt-14 max-w-xl md:mt-16 md:text-center"
         >
-          now pulling:{" "}
-          <span className="font-bold">{albumTitle(topAlbums[pulled])}</span> by{" "}
-          {topAlbums[pulled].artist}
-        </p>
+          {album && (
+            <>
+              <h3 className="text-lead font-bold tracking-[-0.03em]">
+                {album.title}
+              </h3>
+              <p>{album.artist}</p>
+              {album.note && (
+                <div className="mt-4 space-y-3">
+                  {album.note.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              )}
+              {album.track && (
+                <p className="mt-3">
+                  start with:{" "}
+                  {album.track.spotify ? (
+                    <a
+                      href={album.track.spotify}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium underline decoration-ink/30 decoration-2 underline-offset-4 hover:decoration-ink"
+                    >
+                      {album.track.title}
+                    </a>
+                  ) : (
+                    <span className="font-medium">{album.track.title}</span>
+                  )}
+                </p>
+              )}
+              <a
+                href={album.spotify}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex rounded-full bg-ink px-5 py-2.5 font-medium text-paper transition hover:-translate-y-0.5 hover:bg-blue active:translate-y-0"
+              >
+                listen on spotify ↗
+              </a>
+            </>
+          )}
+        </div>
       </section>
 
       {/* Secret Game */}
@@ -296,6 +392,12 @@ export default function BrianRotClient() {
           )}
         </AnimatePresence>
       </div>
+
+      <ReviewDialog
+        film={openFilmId ? films[openFilmId] : null}
+        returnFocusTo={reviewTrigger}
+        onClose={() => setOpenFilmId(null)}
+      />
     </main>
   );
 }
