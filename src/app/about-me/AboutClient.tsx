@@ -198,7 +198,7 @@ const AboutClient: React.FC = () => {
               href="/projects"
               className="font-medium underline decoration-ink/30 decoration-2 underline-offset-4 hover:decoration-ink"
             >
-              RealTalkTracker
+              Talk Tracker
             </Link>
             , which analyzes chat data for deep, possibly concerning insights
             into your digital conversations. If you’ve ever wanted an AI

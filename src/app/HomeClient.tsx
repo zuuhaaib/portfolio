@@ -173,7 +173,7 @@ export default function HomeClient() {
           <div className="reveal md:col-span-5">
             <h2 className="text-head">latest release</h2>
             <p className="mt-5 text-lead">
-              RealTalkTracker: feed it a WhatsApp or Instagram chat and find out
+              Talk Tracker: feed it a WhatsApp or Instagram chat and find out
               who&#39;s actually carrying the conversation.
             </p>
             <Link href="/projects" className={`${pill} mt-7`}>
@@ -186,8 +186,8 @@ export default function HomeClient() {
             style={{ "--i": 1 } as React.CSSProperties}
           >
             <Image
-              src="/projects/rtt-hero.webp"
-              alt="RealTalkTracker landing page asking who's actually carrying the chat"
+              src="/projects/talktracker-hero.webp"
+              alt="Talk Tracker landing page asking who's carrying the chat, with an upload button"
               width={1280}
               height={800}
               sizes="(min-width: 768px) 720px, 100vw"
